@@ -3,11 +3,11 @@ before:
     - go mod download
     #- go generate ./...
 
-github_urls:
-  api: https://github.com/api/v3/
-  upload: https://github.com/api/uploads/
-  download: https://github.com/
-  skip_tls_verify: false
+# github_urls:
+#   api: https://github.com/api/v3/
+#   upload: https://github.com/api/uploads/
+#   download: https://github.com/
+#   skip_tls_verify: false
 builds:
   - env:
       - CGO_ENABLED=0
