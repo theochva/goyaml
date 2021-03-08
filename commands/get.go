@@ -5,21 +5,24 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/theochva/goyaml/commands/cli"
 )
 
-type _GetCmd struct {
+type _GetCommand struct {
+	cli.AppSubCommand
+
+	globalOpts   GlobalOptions
 	outputFormat string
 }
 
-func init() {
-	globalOpts.addCommand(
-		(&_GetCmd{}).createCLICommand(),
-		false, // Dont care for yaml validation errors
-		false) // Dont skip parsing yaml
-}
+// newGetCommand - create the "get" subcommand
+func newGetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_GetCommand{
+		globalOpts: globalOpts,
+	}
 
-func (o *_GetCmd) createCLICommand() *cobra.Command {
-	var cmd = &cobra.Command{
+	cliCmd := &cobra.Command{
 		Use:                   fmt.Sprintf("get <key> [-o|--output %s]", strings.Join(outputFormatValues, "|")),
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"g"},
@@ -33,10 +36,10 @@ func (o *_GetCmd) createCLICommand() *cobra.Command {
 		},
 		ArgAliases: []string{"key"},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return validateEnumValues(o.outputFormat, "Invalid output format specified", outputFormatValues)
+			return validateEnumValues(subCmd.outputFormat, "Invalid output format specified", outputFormatValues)
 		},
-		RunE: o.run,
-		Example: replaceProgName(`  $PROG_NAME -f /tmp/foo.yaml get first.second.third
+		RunE: subCmd.run,
+		Example: cli.ReplaceProgName(`  $PROG_NAME -f /tmp/foo.yaml get first.second.third
   $PROG_NAME -f /tmp/foo.yaml get first.second.third -o json
   $PROG_NAME --file /tmp/foo.yaml get first.second.third
   $PROG_NAME --file /tmp/foo.yaml get first.second.third --output json
@@ -46,35 +49,36 @@ func (o *_GetCmd) createCLICommand() *cobra.Command {
   cat /tmp/foo.yaml | $PROG_NAME get first.second.third --output json`),
 	}
 
-	cmd.Flags().StringVarP(
-		&o.outputFormat,
+	cliCmd.Flags().StringVarP(
+		&subCmd.outputFormat,
 		_flagOutput, _flagOutputShort, "",
 		fmt.Sprintf("the output format for value retrieved. Support formats are: %s", strings.Join(outputFormatValues, ", ")))
 
-	return cmd
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_GetCmd) run(cmd *cobra.Command, args []string) (err error) {
+func (c *_GetCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (
 		key   = args[0]
 		value interface{}
 	)
 
-	if value, err = globalOpts.yamlFile.Get(key); err != nil {
+	if value, err = c.globalOpts.YamlFile().Get(key); err != nil {
 		return
 	} else if value == nil {
 		return
 	}
 
-	if o.outputFormat != "" {
+	if c.outputFormat != "" {
 		var bytes []byte
-		if bytes, err = marshalValue(value, o.outputFormat); err != nil {
+		if bytes, err = marshalValue(value, c.outputFormat); err != nil {
 			return
 		}
-		fmt.Println(string(bytes))
+		cmd.Println(string(bytes))
 		return
 	}
 
-	fmt.Println(value)
+	cmd.Println(value)
 	return
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/jedib0t/go-pretty/text"
 	"github.com/theochva/goyaml/commands"
 )
 
@@ -12,6 +11,5 @@ var (
 )
 
 func main() {
-	commands.SetVersion(version, commit, date)
-	commands.Execute()
+	commands.NewGoyamlApp(version, commit, date).Execute()
 }

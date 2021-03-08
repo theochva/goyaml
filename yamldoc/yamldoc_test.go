@@ -54,12 +54,12 @@ func TestYamlDoc(t *testing.T) {
 
 func checkContainsValue(yaml YamlDoc, key string, expectedValue bool) {
 	contains, err := yaml.Contains(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(contains).To(Equal(expectedValue))
 }
 func checkGetValue(yaml YamlDoc, key string, expectedValue interface{}) {
 	value, err := yaml.Get(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	if expectedValue == nil {
 		Expect(value).To(BeNil())
 	} else {
@@ -68,7 +68,7 @@ func checkGetValue(yaml YamlDoc, key string, expectedValue interface{}) {
 }
 func checkGetStringValue(yaml YamlDoc, key string, expectedValue string) {
 	value, err := yaml.GetString(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(value).To(Equal(expectedValue))
 }
 func checkGetStringValueTypeErr(yaml YamlDoc, key string) {
@@ -78,7 +78,7 @@ func checkGetStringValueTypeErr(yaml YamlDoc, key string) {
 }
 func checkGetIntValue(yaml YamlDoc, key string, expectedValue int) {
 	value, err := yaml.GetInt(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(value).To(Equal(expectedValue))
 }
 func checkGetIntValueTypeErr(yaml YamlDoc, key string) {
@@ -88,7 +88,7 @@ func checkGetIntValueTypeErr(yaml YamlDoc, key string) {
 }
 func checkGetBoolValue(yaml YamlDoc, key string, expectedValue bool) {
 	value, err := yaml.GetBool(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	if expectedValue {
 		Expect(value).To(BeTrue())
 	} else {
@@ -102,7 +102,7 @@ func checkGetBoolValueTypeErr(yaml YamlDoc, key string) {
 }
 func checkDeleteValue(yaml YamlDoc, key string, valueExisted bool) {
 	deleted, err := yaml.Delete(key)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(deleted).To(Equal(valueExisted))
 
 	checkGetValue(yaml, key, nil)
@@ -110,14 +110,14 @@ func checkDeleteValue(yaml YamlDoc, key string, valueExisted bool) {
 }
 func checkSetValue(yaml YamlDoc, key string, value interface{}) {
 	valueSet, err := yaml.Set(key, value)
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(valueSet).To(BeTrue())
 
 	checkGetValue(yaml, key, value)
 }
 func checkText(yaml YamlDoc, expectedText string) {
 	text, err := yaml.Text()
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(text).To(Equal(expectedText))
 }
 func checkSampleYaml(yaml YamlDoc) {
@@ -170,7 +170,7 @@ var _ = Describe("Yaml functions", func() {
 		BeforeEach(func() {
 			var err error
 			yaml, err = FromString(yamlText)
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 			Expect(yaml).ToNot(BeNil())
 		})
 
@@ -182,7 +182,7 @@ var _ = Describe("Yaml functions", func() {
 		BeforeEach(func() {
 			var err error
 			yaml, err = New(nil)
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 			Expect(yaml).ToNot(BeNil())
 		})
 		// Check the data in the yaml is the same as the map we initialized with

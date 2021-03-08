@@ -1,32 +1,33 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/theochva/goyaml/commands/cli"
 )
 
-type _ValidateCmd struct {
-	details bool
+type _ValidateCommand struct {
+	cli.AppSubCommand
+	ValidationErrorAwareCommand
+
+	globalOpts GlobalOptions
+	details    bool
 }
 
-func init() {
-	globalOpts.addCommand(
-		(&_ValidateCmd{}).createCLICommand(),
-		true,  // Do care for yaml validation errors
-		false) // Dont skip parsing yaml
-}
+// newValidateCommand - create the "validate" subcommand
+func newValidateCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_ValidateCommand{
+		globalOpts: globalOpts,
+	}
 
-func (o *_ValidateCmd) createCLICommand() *cobra.Command {
-	var cmd = &cobra.Command{
+	cliCmd := &cobra.Command{
 		Use:                   "validate [-d|--details]",
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"v"},
 		Short:                 "Validate the yaml syntax",
 		Long:                  "Validate the  yaml syntax. It either outputs 'true', 'false' or the validation msg.",
 		Args:                  cobra.NoArgs,
-		RunE:                  o.run,
-		Example: replaceProgName(`  $PROG_NAME -f /tmp/foo.yaml validate
+		RunE:                  subCmd.run,
+		Example: cli.ReplaceProgName(`  $PROG_NAME -f /tmp/foo.yaml validate
   $PROG_NAME -f /tmp/foo.yaml validate --details
   $PROG_NAME -f /tmp/foo.yaml validate -d
   $PROG_NAME -f /tmp/foo.yaml v
@@ -41,22 +42,26 @@ func (o *_ValidateCmd) createCLICommand() *cobra.Command {
   cat /tmp/foo.yaml | $PROG_NAME v -d`),
 	}
 
-	cmd.Flags().BoolVarP(
-		&o.details,
+	cliCmd.Flags().BoolVarP(
+		&subCmd.details,
 		_flagDetails, _flagDetailsShort, false,
 		"Prints the parsing error instead of 'false'.  If valid, it outputs nothing",
 	)
 
-	return cmd
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_ValidateCmd) run(cmd *cobra.Command, args []string) (err error) {
-	valid := (globalOpts.yamlValidationErr == nil)
+// IsValidationAware - implementing this method to indicate that this command cares for validation errors
+func (c *_ValidateCommand) IsValidationAware() bool { return true }
 
-	if !valid && o.details {
-		fmt.Println(globalOpts.yamlValidationErr.Error())
-		return
+func (c *_ValidateCommand) run(cmd *cobra.Command, args []string) (err error) {
+	valid := (c.globalOpts.ValidationError() == nil)
+
+	if !c.details {
+		cmd.Println(valid)
+	} else if !valid {
+		cmd.Println(c.globalOpts.ValidationError().Error())
 	}
-	fmt.Println(valid)
 	return
 }

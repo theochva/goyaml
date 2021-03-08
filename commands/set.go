@@ -9,10 +9,16 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/theochva/goyaml/commands/cli"
 	"gopkg.in/yaml.v2"
 )
 
-type _SetCmd struct {
+type _SetCommand struct {
+	cli.AppSubCommand
+	SkipParsingCommand
+	ValidationErrorAwareCommand
+
+	globalOpts  GlobalOptions
 	valueType   string
 	inputFile   string
 	readStdin   bool
@@ -33,24 +39,23 @@ const (
 
 var validValueTypes = []string{_ValueTypeString, _ValueTypeInt, _ValueTypeBool, _ValueTypeJSON, _ValueTypeYAML}
 
-func init() {
-	globalOpts.addCommand(
-		(&_SetCmd{}).createCLICommand(),
-		false, // Dont care for yaml validation errors
-		false) // Dont skip parsing yaml
-}
+// newSetCommand - create the "set" subcommand
+func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_SetCommand{
+		globalOpts: globalOpts,
+	}
 
-func (o *_SetCmd) createCLICommand() *cobra.Command {
 	validTypesWithOr := strings.Join(validValueTypes, "|")
-
-	var cmd = &cobra.Command{
-		Use: replaceProgName(`set <key> <value> [-t|--type %s]
+	cliCmd := &cobra.Command{
+		Use: cli.ReplaceProgName(`set <key> <value> [-t|--type %s]
   $PROG_NAME -f|--file <yaml-file> set <key> --stdin [-t|--type %s]
   $PROG_NAME [-f|--file <yaml-file>] set <key> -i|--input <value-file> [-t|--type %s]`, validTypesWithOr, validTypesWithOr, validTypesWithOr),
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"s"},
 		Short:                 "Set a value in a YAML document",
-		Long:                  "Set a value in a YAML document.",
+		Long: `Set a value in a YAML document. There are multiple ways you can set values in a YAML document:
+  - Set a value in a YAML file with a value specified, read from a file or read from stdin  
+  - Update a value in a YAML document read from stdin with a value specified or read from a file and print result to stdout`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return fmt.Errorf("requires the 'key' for the value to be set")
@@ -60,133 +65,153 @@ func (o *_SetCmd) createCLICommand() *cobra.Command {
 			return nil
 		},
 		ArgAliases: []string{"key", "value"},
-		PreRunE:    o.validateAndPreProcessParams,
-		RunE:       o.run,
-		Example: replaceProgName(`  Update a YAML file with a "primitive" value specified as a parameter:
+		PreRunE:    subCmd.validateAndPreProcessParams,
+		RunE:       subCmd.run,
+		Example: cli.ReplaceProgName(`  Update a YAML file with a value specified as a parameter:
     $PROG_NAME -f /tmp/foo.yaml set first.second.strProp "someValue"
     $PROG_NAME -f /tmp/foo.yaml set first.second.intProp 10 -t int
     $PROG_NAME -f /tmp/foo.yaml set first.second.boolProp true -t bool
-
-  Update YAML read from stdin with a "primitive" value specified as a parameter and print result to stdout:
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.strProp "someValue"
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.intProp 10 -t int
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.boolProp true -t bool
-
-  Update a YAML file with a value from a JSON string:
-    $PROG_NAME -f /tmp/foo.yaml set first.second.third "{\"prop1\": \"str-value\"}" -t json
-    $PROG_NAME -f /tmp/foo.yaml set first.second.third "{\"prop1\": 100}" -t json
-    $PROG_NAME -f /tmp/foo.yaml set first.second.third "{\"prop1\": true}" -t json
-
-  Update YAML read from stdin with a JSON value specified as a parameter and print result to stdout:
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "{\"prop1\": \"str-value\"}" -t json
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "{\"prop1\": 100}" -t json
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "{\"prop1\": true}" -t json
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "{\"prop1\": true}" -t json | $PROG_NAME set first.second.fourth 100 -t int
-
-  Update a YAML file with a value from a YAML string:
+    $PROG_NAME -f /tmp/foo.yaml set first.second.third '{"prop1": "str-value"}' -t json
+    $PROG_NAME -f /tmp/foo.yaml set first.second.third '{"prop1": 100}' -t json
+    $PROG_NAME -f /tmp/foo.yaml set first.second.third '{"prop1": true}' -t json
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: str-value" -t yaml
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: 100" -t yaml
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: true" -t yaml
 
-  Update YAML read from stdin with a YAML value specified as a parameter and print result to stdout:
+  Update a YAML file with a value read from another file:
+    $PROG_NAME -f /tmp/foo.yaml set first.second.third -i /tmp/foo.json -t json
+    $PROG_NAME -f /tmp/foo.yaml set first.second.third -i /tmp/bar.yaml -t yaml
+    $PROG_NAME -f /tmp/foo.yaml set first.second.privateKey -i .ssh/id_rsa_priv
+
+  Update YAML read from stdin with a value specified as a parameter and print result to stdout:
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.strProp "someValue"
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.intProp 10 -t int
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.boolProp true -t bool
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third '{"prop1": "str-value"}' -t json
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third '{"prop1": 100}' -t json
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third '{"prop1": true}' -t json | $PROG_NAME set first.second.fourth 100 -t int
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: str-value" -t yaml
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: 100" -t yaml
-    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: true" -t yaml`),
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: true" -t yaml
+
+  Update YAML read from stdin with a value read from another file and print result to stdout:
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third -i /tmp/foo.json -t json
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.third -i /tmp/bar.yaml -t yaml
+    cat /tmp/foo.yaml | $PROG_NAME set first.second.privateKey -i .ssh/id_rsa_priv
+
+  Generate YAML to stdout with a value read from stdin:
+    cat /tmp/foo.json | $PROG_NAME set first.second.third --stdin -t json
+    cat /tmp/bar.yaml | $PROG_NAME set first.second.third --stdin -t yaml
+    cat ~/.ssh/id_rsa_priv | $PROG_NAME set first.second.privateKey --stdin`),
 	}
 
-	cmd.Flags().StringVarP(
-		&o.valueType,
+	cliCmd.Flags().StringVarP(
+		&subCmd.valueType,
 		_flagType, _flagTypeShort, _ValueTypeString,
 		"the value type to set. Valid values are: "+strings.Join(validValueTypes, ", "),
 	)
-	cmd.Flags().BoolVarP(
-		&o.readStdin,
+	cliCmd.Flags().BoolVarP(
+		&subCmd.readStdin,
 		_flagStdin, "", false,
 		"read stdin for the value to set",
 	)
-	cmd.Flags().StringVarP(
-		&o.inputFile,
+	cliCmd.Flags().StringVarP(
+		&subCmd.inputFile,
 		_flagInput, _flagInputShort, "",
 		"the file containing the value to set",
 	)
-	return cmd
+
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_SetCmd) validateAndPreProcessParams(cmd *cobra.Command, args []string) error {
+// ShouldSkipParsing - implementing this method to indicate that this command wants to take care of the parsing
+func (c *_SetCommand) ShouldSkipParsing() bool { return true }
+
+// IsValidationAware - implementing this method to indicate that this command cares for validation errors
+func (c *_SetCommand) IsValidationAware() bool { return true }
+
+func (c *_SetCommand) validateAndPreProcessParams(cmd *cobra.Command, args []string) error {
+	// First check if file specified with -f or if value to set is not comming from stdin
+	if !c.globalOpts.IsPipe() || !c.readStdin {
+		if err := c.globalOpts.Load(); err != nil {
+			return err
+		}
+	}
 	multiSourceErr := fmt.Errorf(
 		"Must select only one source of the value to set. It can be specified either via "+
 			"the \"value\" argument, the flag '-%s|--%s' or the flag '--%s'", _flagInputShort, _flagInput, _flagStdin)
 	if len(args) == 2 {
-		o.valueSource = _ValueSourceArg
+		c.valueSource = _ValueSourceArg
 	}
-	if o.inputFile != "" {
-		if o.valueSource != "" {
+	if c.inputFile != "" {
+		if c.valueSource != "" {
 			return multiSourceErr
 		}
-		o.valueSource = _ValueSourceFile
+		c.valueSource = _ValueSourceFile
 	}
-	if o.readStdin {
-		if o.valueSource != "" {
+	if c.readStdin {
+		if c.valueSource != "" {
 			return multiSourceErr
+			// } else if c.globalOpts.IsPipe() {
+			// 	return fmt.Errorf("Cannot use stdin for both the YAML and the value to set")
 		}
-		o.valueSource = _ValueSourceStdin
+		c.valueSource = _ValueSourceStdin
 	}
-	if o.valueSource == "" {
+	if c.valueSource == "" {
 		return fmt.Errorf("Must clearly specify the source of the value to set. It can be specified either via "+
 			"the \"value\" argument, the flag '-%s|--%s' or the flag '--%s'", _flagInputShort, _flagInput, _flagStdin)
-	} else if o.readStdin && globalOpts.pipe {
-		return fmt.Errorf("Cannot use stdin for both the YAML and the value to set")
 	}
 
-	return validateEnumValues(o.valueType, "Invalid value type", validValueTypes)
+	return validateEnumValues(c.valueType, "Invalid value type", validValueTypes)
 }
 
-func (o *_SetCmd) run(cmd *cobra.Command, args []string) (err error) {
+func (c *_SetCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (
 		key      = args[0]
 		value    interface{}
 		valueSet bool
 	)
 
-	if value, err = o.getValue(args); err != nil {
+	if value, err = c.getValue(args); err != nil {
 		return
 	}
 
 	if value != nil {
-		if valueSet, err = globalOpts.yamlFile.Set(key, value); err != nil {
+		if valueSet, err = c.globalOpts.YamlFile().Set(key, value); err != nil {
 			return
 		}
 
 		if valueSet {
-			err = globalOpts.yamlFile.Save()
+			err = c.globalOpts.YamlFile().Save()
 		}
 	}
 
-	if !globalOpts.pipe {
-		fmt.Println(valueSet)
+	if !c.globalOpts.IsPipe() {
+		cmd.Println(valueSet)
 	}
 	return
 }
 
-func (o *_SetCmd) getValue(args []string) (value interface{}, err error) {
-	if o.valueSource == _ValueSourceArg {
-		return o.parseValue(args[1], o.valueType)
+func (c *_SetCommand) getValue(args []string) (value interface{}, err error) {
+	if c.valueSource == _ValueSourceArg {
+		return c.parseValue(args[1], c.valueType)
 	}
 
 	var bytes []byte
 
-	if o.inputFile != "" {
-		bytes, err = os.ReadFile(o.inputFile)
+	if c.inputFile != "" {
+		bytes, err = os.ReadFile(c.inputFile)
 	} else {
-		bytes, err = ioutil.ReadAll(os.Stdin)
+		bytes, err = ioutil.ReadAll(c.GetCliCommand().InOrStdin())
 	}
 	if err != nil {
 		return nil, err
 	}
-	return o.parseValue(string(bytes), o.valueType)
+	return c.parseValue(string(bytes), c.valueType)
 }
 
-func (o *_SetCmd) parseValue(value string, valueType string) (actualValue interface{}, err error) {
+func (c *_SetCommand) parseValue(value string, valueType string) (actualValue interface{}, err error) {
 	actualValue = value
 	if valueType != _ValueTypeString {
 		switch valueType {

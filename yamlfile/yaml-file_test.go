@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/theochva/goyaml/internal/tests"
 	"github.com/theochva/goyaml/yamldoc"
 )
 
@@ -55,7 +56,7 @@ func TestYamlFile(t *testing.T) {
 
 func checkText(yaml yamldoc.YamlDoc, expectedText string) {
 	text, err := yaml.Text()
-	Expect(err).To(BeNil())
+	Expect(err).ToNot(HaveOccurred())
 	Expect(text).To(Equal(expectedText))
 }
 
@@ -67,12 +68,9 @@ var _ = Describe("YamlFile functions", func() {
 		BeforeEach(func() {
 			var err error
 
-			file, err = os.CreateTemp("", "test*.yaml")
-			Expect(err).To(BeNil())
+			file, err = tests.CreateTempFileWithContents("test*.yaml", yamlText)
+			Expect(err).ToNot(HaveOccurred())
 			Expect(file).ToNot(BeNil())
-
-			err = os.WriteFile(file.Name(), []byte(yamlText), 0666)
-			Expect(err).To(BeNil())
 		})
 		AfterEach(func() {
 			if file != nil {
@@ -93,7 +91,7 @@ var _ = Describe("YamlFile functions", func() {
 			loaded, err := yamlFile.Load()
 			// check that it is loaded without errors
 			Expect(loaded).To(BeTrue())
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 
 			// check the yaml file's text
 			checkText(yamlFile, yamlText)

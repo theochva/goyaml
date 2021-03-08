@@ -1,6 +1,7 @@
 package yamlfile
 
 import (
+	"io"
 	"os"
 
 	"github.com/pkg/errors"
@@ -17,6 +18,8 @@ type YamlFile interface {
 	Filename() string
 	// Load - loads the file (if it exists)
 	Load() (loaded bool, err error)
+	// LoadReader - load from a reader
+	LoadReader(reader io.Reader) (loaded bool, err error)
 	// Save - saves the yaml file
 	Save() (err error)
 }
@@ -69,12 +72,24 @@ func (y *yamlFile) Load() (loaded bool, err error) {
 
 	defer file.Close()
 
-	if y.YamlDoc, err = yamldoc.New(file); err != nil {
-		return false, err
+	return y.LoadReader(file)
+	// if y.YamlDoc, err = yamldoc.New(file); err != nil {
+	// 	return false, err
+	// }
+
+	// return true, nil
+}
+
+// LoadReader - load from a reader
+func (y *yamlFile) LoadReader(reader io.Reader) (loaded bool, err error) {
+	if reader != nil {
+		if y.YamlDoc, err = yamldoc.New(reader); err != nil {
+			return false, err
+		}
+
+		return true, nil
 	}
-
-	return true, nil
-
+	return false, nil
 }
 
 // Save - saves the yaml file

@@ -1,4 +1,4 @@
-package commands
+package cli
 
 import (
 	"fmt"
@@ -35,13 +35,19 @@ Examples:
 
 `
 
-func setExamplesAtEndOfHelp(cmd *cobra.Command) {
+const _VersionTemplate = `{{with .Name}}{{printf "%s " .}}{{end}}{{printf "version %s" .Version}}{{if .Annotations}}
+{{with .Annotations}}{{.Author}}{{end}}{{end}}
+`
+
+// SetExamplesAtEndOfUsage - set the examples at the end of the usage text
+func SetExamplesAtEndOfUsage(cmd *cobra.Command) {
 	if cmd != nil {
 		cmd.SetUsageTemplate(_UsageTemplate)
 	}
 }
 
-func setUsageReturnCode(cmd *cobra.Command, rc int) {
+// SetUsageReturnCode - the RC to return when usage is displayed
+func SetUsageReturnCode(cmd *cobra.Command, rc int) {
 	if cmd != nil {
 		// Make the help function return a non-zero rc
 		helpFunc := cmd.HelpFunc()
@@ -54,7 +60,21 @@ func setUsageReturnCode(cmd *cobra.Command, rc int) {
 	}
 }
 
-func replaceProgName(format string, a ...interface{}) string {
+// SetVersionWithAuthor - show author info in the version
+func SetVersionWithAuthor(cmd *cobra.Command, author string) {
+	if author != "" {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations["Author"] = author
+		// versionTemplate := cmd.VersionTemplate()
+		// cmd.SetVersionTemplate(_VersionTemplate)
+	}
+	cmd.SetVersionTemplate(_VersionTemplate)
+}
+
+// ReplaceProgName - replace the program name ("$PROG_NAME") in a string
+func ReplaceProgName(format string, a ...interface{}) string {
 	str := fmt.Sprintf(format, a...)
 	_, progName := filepath.Split(os.Args[0])
 	return strings.ReplaceAll(str, "$PROG_NAME", progName)

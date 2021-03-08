@@ -6,34 +6,34 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/theochva/goyaml/commands/cli"
 )
 
-type _ToJSONCmd struct {
+type _ToJSONCommand struct {
+	cli.AppSubCommand
+
+	globalOpts GlobalOptions
 	pretty     bool
 	outputFile string
 }
 
-func init() {
-	globalOpts.addCommand(
-		(&_ToJSONCmd{}).createCLICommand(),
-		false, // Dont care for yaml validation errors
-		false) // Dont skip parsing yaml
-}
-
-func (o *_ToJSONCmd) createCLICommand() *cobra.Command {
-	var cmd = &cobra.Command{
+func newToJSONCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_ToJSONCommand{
+		globalOpts: globalOpts,
+	}
+	cliCmd := &cobra.Command{
 		Use:                   "to-json [-o|--output <output-json-file>] [-p|--pretty]",
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"tj", "tojson", "json"},
 		Short:                 "Convert YAML to JSON",
 		Args:                  cobra.NoArgs,
-		RunE:                  o.run,
+		RunE:                  subCmd.run,
 		Long: `Convert a YAML document to JSON. 
 
 Note:
   Some ordering might be lost in maps and arrays due to the different way
   maps/arrays are implemented in Go. However, the data should all be intact.`,
-		Example: replaceProgName(`  $PROG_NAME --file /tmp/foo.yaml to-json --output foo.json
+		Example: cli.ReplaceProgName(`  $PROG_NAME --file /tmp/foo.yaml to-json --output foo.json
   $PROG_NAME --file /tmp/foo.yaml to-json --output foo.json --pretty
   $PROG_NAME --file /tmp/foo.yaml to-json -o foo.json
   $PROG_NAME --file /tmp/foo.yaml to-json -o foo.json -p
@@ -48,39 +48,41 @@ Note:
   cat /tmp/foo.yaml | $PROG_NAME to-json | jq .`),
 	}
 
-	cmd.Flags().BoolVarP(
-		&o.pretty,
+	cliCmd.Flags().BoolVarP(
+		&subCmd.pretty,
 		_flagPretty, _flagPrettyShort, false,
 		"pretty format the json output",
 	)
-	cmd.Flags().StringVarP(
-		&o.outputFile,
+	cliCmd.Flags().StringVarP(
+		&subCmd.outputFile,
 		_flagOutput, _flagOutputShort, "",
 		"The file to write the JSON output to. If not specified, the output is printed to stdout",
 	)
-	return cmd
+
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_ToJSONCmd) run(cmd *cobra.Command, args []string) (err error) {
-	if converted, mapData := globalOpts.yamlFile.Map(); converted {
+func (c *_ToJSONCommand) run(cmd *cobra.Command, args []string) (err error) {
+	if converted, mapData := c.globalOpts.YamlFile().Map(); converted {
 		var bytes []byte
 
-		if bytes, err = marshalToJSON(mapData, o.pretty); err != nil {
+		if bytes, err = marshalToJSON(mapData, c.pretty); err != nil {
 			return err
 		}
 
-		if o.outputFile != "" {
-			if err = os.WriteFile(o.outputFile, bytes, 0644); err != nil {
-				return errors.Wrapf(err, "Problem writing to '%s'", o.outputFile)
+		if c.outputFile != "" {
+			if err = os.WriteFile(c.outputFile, bytes, 0644); err != nil {
+				return errors.Wrapf(err, "Problem writing to '%s'", c.outputFile)
 			}
 		} else {
-			fmt.Println(string(bytes))
+			cmd.Println(string(bytes))
 		}
 		return
 	}
 
-	if globalOpts.pipe {
+	if c.globalOpts.IsPipe() {
 		return fmt.Errorf("Unable to convert YAML from stdin to JSON")
 	}
-	return fmt.Errorf("Unable to convert YAML file '%s' to JSON", globalOpts.yamlFile.Filename())
+	return fmt.Errorf("Unable to convert YAML file '%s' to JSON", c.globalOpts.YamlFile().Filename())
 }
