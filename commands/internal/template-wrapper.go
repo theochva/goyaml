@@ -1,16 +1,14 @@
-package commands
+package internal
 
 import (
-	"fmt"
 	htmlTemplate "html/template"
 	"io"
-	"os"
 	"path"
-	"path/filepath"
 	"text/template"
 )
 
-type templateWrapper struct {
+// TemplateWrapper - adapter type around either html/template or text/template packages
+type TemplateWrapper struct {
 	tmpl             *template.Template
 	htmlTmpl         *htmlTemplate.Template
 	parseFilesFn     func(filenames ...string) error
@@ -19,20 +17,28 @@ type templateWrapper struct {
 	createTextTmplFn func(templateText string) error
 }
 
-func (w templateWrapper) newTextTemplate(templateText string) error {
+// NewTextTemplate - create new text/template
+func (w TemplateWrapper) NewTextTemplate(templateText string) error {
 	return w.createTextTmplFn(templateText)
 }
-func (w templateWrapper) parseFiles(filenames ...string) error {
+
+// ParseFiles - parse files
+func (w TemplateWrapper) ParseFiles(filenames ...string) error {
 	return w.parseFilesFn(filenames...)
 }
-func (w templateWrapper) parseGlob(pattern string) error {
+
+// ParseGlob - parse glob
+func (w TemplateWrapper) ParseGlob(pattern string) error {
 	return w.parseGlobFn(pattern)
 }
-func (w templateWrapper) execute(wr io.Writer, data interface{}) error {
+
+// Execute - execute
+func (w TemplateWrapper) Execute(wr io.Writer, data interface{}) error {
 	return w.executeFn(wr, data)
 }
 
-func newTemplateWrapper(format string) (w templateWrapper) {
+// NewTemplateWrapper - create new template wrapper
+func NewTemplateWrapper(format string) (w TemplateWrapper) {
 
 	if format == "text" {
 		newTmpl := func(name string) *template.Template {
@@ -114,44 +120,4 @@ func newTemplateWrapper(format string) (w templateWrapper) {
 	}
 
 	return w
-}
-
-func fileOrDirectoryExists(filename string) bool {
-	_, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
-
-func isDirectory(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return info.IsDir()
-}
-
-// getEnv - utility function available in templates as "getenv"
-func getEnv(key string) string {
-	value, found := os.LookupEnv(key)
-
-	if found {
-		return value
-	}
-	return ""
-}
-
-// getFirstMatchedFile - from the given pattern, it turns the filename (without dir) of the first matching file
-func getFirstMatchedFile(pattern string) (string, error) {
-	filenames, err := filepath.Glob(pattern)
-	if err != nil {
-		return "", err
-	}
-	if len(filenames) == 0 {
-		return "", fmt.Errorf("No files matched for pattern: %s", pattern)
-	}
-
-	_, file := path.Split(filenames[0])
-	return file, nil
 }

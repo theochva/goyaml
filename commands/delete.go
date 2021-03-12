@@ -4,19 +4,22 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/theochva/goyaml/commands/cli"
 )
 
-type _DeleteCmd struct{}
+type _DeleteCommand struct {
+	cli.AppSubCommand
 
-func init() {
-	globalOpts.addCommand(
-		(&_DeleteCmd{}).createCLICommand(),
-		false, // Dont care for yaml validation errors
-		false) // Dont skip parsing yaml
+	globalOpts GlobalOptions
 }
 
-func (o *_DeleteCmd) createCLICommand() *cobra.Command {
-	var cmd = &cobra.Command{
+func newDeleteCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_DeleteCommand{
+		globalOpts: globalOpts,
+	}
+
+	cliCmd := &cobra.Command{
 		Use:                   "delete <key>",
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"d", "del", "remove", "rm"},
@@ -30,8 +33,8 @@ from a file, it simply outputs 'true' or 'false' to indicate whether the value w
 			return nil
 		},
 		ArgAliases: []string{"key"},
-		RunE:       o.run,
-		Example: replaceProgName(`  $PROG_NAME -f /tmp/foo.yaml delete first.second.third
+		RunE:       subCmd.run,
+		Example: cli.ReplaceProgName(`  $PROG_NAME -f /tmp/foo.yaml delete first.second.third
   $PROG_NAME -f /tmp/foo.yaml del first.second.third
   $PROG_NAME -f /tmp/foo.yaml d first.second.third
   $PROG_NAME -f /tmp/foo.yaml remove first.second.third
@@ -45,38 +48,39 @@ from a file, it simply outputs 'true' or 'false' to indicate whether the value w
     cat /tmp/foo.yaml | $PROG_NAME rm first.second.third`),
 	}
 
-	return cmd
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_DeleteCmd) run(cmd *cobra.Command, args []string) (err error) {
+func (c *_DeleteCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (
 		key      = args[0]
 		yamlText string
 		deleted  bool
 	)
 
-	if deleted, err = globalOpts.yamlFile.Delete(key); err != nil {
+	if deleted, err = c.globalOpts.YamlFile().Delete(key); err != nil {
 		return
 	}
 
 	if deleted {
 		// If YAML read from stdin, then "Save" will output result
-		if err = globalOpts.yamlFile.Save(); err != nil {
+		if err = c.globalOpts.YamlFile().Save(); err != nil {
 			return err
 		}
 	}
 
 	// If YAML not read from stdin, then print the delete result
-	if !globalOpts.pipe {
-		fmt.Println(deleted)
+	if !c.globalOpts.IsPipe() {
+		cmd.Println(deleted)
 	} else {
 		// Else, YAML read from stdin. If not deleted,
 		// then nothing printed, so dump the YAML
 		if !deleted {
-			if yamlText, err = globalOpts.yamlFile.Text(); err != nil {
+			if yamlText, err = c.globalOpts.YamlFile().Text(); err != nil {
 				return err
 			}
-			fmt.Println(yamlText)
+			cmd.Println(yamlText)
 		}
 	}
 	return

@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -80,7 +81,7 @@ func marshalValue(value interface{}, outputFormat string) (bytes []byte, err err
 
 func marshalToJSON(v interface{}, indent bool) (bytes []byte, err error) {
 	if indent {
-		if bytes, err = json.MarshalIndent(v, "", "    "); err != nil {
+		if bytes, err = json.MarshalIndent(v, "", "\t"); err != nil {
 			return
 		}
 	} else {
@@ -105,4 +106,27 @@ func splitAndTrim(valuesStr string) (values []string) {
 	}
 
 	return
+}
+
+func convertBytes(bytes []byte, valueType string) (actualValue interface{}, err error) {
+	switch valueType {
+	case _FormatText:
+		actualValue = string(bytes)
+	case _FormatYAML:
+		err = yaml.Unmarshal(bytes, &actualValue)
+	case _FormatJSON:
+		err = json.Unmarshal(bytes, &actualValue)
+	}
+
+	return
+}
+
+func convertFileValue(filename string, valueType string) (actualValue interface{}, err error) {
+	var bytes []byte
+
+	if bytes, err = os.ReadFile(filename); err != nil {
+		return
+	}
+
+	return convertBytes(bytes, valueType)
 }

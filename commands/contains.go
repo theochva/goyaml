@@ -4,19 +4,22 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/theochva/goyaml/commands/cli"
 )
 
-type _ContainsCmd struct{}
+type _ContainsCommand struct {
+	cli.AppSubCommand
 
-func init() {
-	globalOpts.addCommand(
-		(&_ContainsCmd{}).createCLICommand(),
-		false, // Dont care for yaml validation errors
-		false) // Dont skip parsing yaml
+	globalOpts GlobalOptions
 }
 
-func (o *_ContainsCmd) createCLICommand() *cobra.Command {
-	var cmd = &cobra.Command{
+func newContainsCommand(globalOpts GlobalOptions) cli.AppSubCommand {
+	subCmd := &_ContainsCommand{
+		globalOpts: globalOpts,
+	}
+
+	cliCmd := &cobra.Command{
 		Use:                   "contains <key>",
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"c", "has"},
@@ -29,8 +32,8 @@ func (o *_ContainsCmd) createCLICommand() *cobra.Command {
 			return nil
 		},
 		ArgAliases: []string{"key"},
-		RunE:       o.run,
-		Example: replaceProgName(`  $PROG_NAME -f /tmp/foo.yaml contains first.second.third
+		RunE:       subCmd.run,
+		Example: cli.ReplaceProgName(`  $PROG_NAME -f /tmp/foo.yaml contains first.second.third
   $PROG_NAME -f /tmp/foo.yaml has first.second.third
   $PROG_NAME -f /tmp/foo.yaml c first.second.third
 
@@ -39,19 +42,20 @@ func (o *_ContainsCmd) createCLICommand() *cobra.Command {
   cat /tmp/foo.yaml | $PROG_NAME c first.second.third`),
 	}
 
-	return cmd
+	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+	return subCmd
 }
 
-func (o *_ContainsCmd) run(cmd *cobra.Command, args []string) (err error) {
+func (c *_ContainsCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (
 		key       = args[0]
 		contained bool
 	)
 
-	if contained, err = globalOpts.yamlFile.Contains(key); err != nil {
+	if contained, err = c.globalOpts.YamlFile().Contains(key); err != nil {
 		return
 	}
 
-	fmt.Println(contained)
+	cmd.Println(contained)
 	return
 }
