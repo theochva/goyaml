@@ -42,6 +42,7 @@ brews:
       owner: theochva
       name: homebrew-grizano
     name: goyaml
+    folder: Formula
     description: Utility for performing simple operations on a YAML file.
     homepage: https://github.com/theochva/goyaml
     test: |
