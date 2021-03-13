@@ -39,8 +39,8 @@ first:
 		}
 
 		fmt.Printf("Value read: %s\n", value)
-		// Output: Value read: a value
 	}
+	// Output: Value read: a value
 }
 
 func ExampleLoad() {
@@ -74,6 +74,6 @@ first:
 		}
 
 		fmt.Printf("Value read: %s\n", value)
-		// Output: Value read: a value
 	}
+	// Output: Value read: a value
 }
