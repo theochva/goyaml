@@ -31,6 +31,13 @@ const (
 )
 
 const (
+	_CmdOptValidationAware = "CmdOptValidationAware"
+	_CmdOptSkipParsing     = "CmdOptSkipParsing"
+	_CmdOptValueTrue       = "true"
+	_CmdOptValueFalse      = "false"
+)
+
+const (
 	_FormatText = "text"
 	_FormatJSON = "json"
 	_FormatYAML = "yaml"

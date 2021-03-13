@@ -6,12 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/theochva/goyaml/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/cli"
 )
 
 type _FromJSONCommand struct {
 	cli.AppSubCommand
-	SkipParsingCommand
 
 	globalOpts GlobalOptions
 	inputFile  string
@@ -25,6 +24,7 @@ func newFromJSONCommand(globalOpts GlobalOptions) cli.AppSubCommand {
 	cliCmd := &cobra.Command{
 		Use:                   "from-json [-i|--input <input-json-file>]",
 		DisableFlagsInUseLine: true,
+		Annotations:           map[string]string{_CmdOptSkipParsing: _CmdOptValueTrue},
 		Aliases:               []string{"fj", "fromjson"},
 		Short:                 "Convert JSON to YAML",
 		Args:                  cobra.NoArgs,
@@ -59,9 +59,6 @@ Note:
 	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
 	return subCmd
 }
-
-// ShouldSkipParsing - implementing this method to indicate that this command wants to take care of the parsing
-func (c *_FromJSONCommand) ShouldSkipParsing() bool { return true }
 
 func (c *_FromJSONCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (

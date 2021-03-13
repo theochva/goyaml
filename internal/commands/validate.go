@@ -2,12 +2,11 @@ package commands
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/theochva/goyaml/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/cli"
 )
 
 type _ValidateCommand struct {
 	cli.AppSubCommand
-	ValidationErrorAwareCommand
 
 	globalOpts GlobalOptions
 	details    bool
@@ -23,6 +22,7 @@ func newValidateCommand(globalOpts GlobalOptions) cli.AppSubCommand {
 		Use:                   "validate [-d|--details]",
 		DisableFlagsInUseLine: true,
 		Aliases:               []string{"v"},
+		Annotations:           map[string]string{_CmdOptValidationAware: _CmdOptValueTrue},
 		Short:                 "Validate the yaml syntax",
 		Long:                  "Validate the  yaml syntax. It either outputs 'true', 'false' or the validation msg.",
 		Args:                  cobra.NoArgs,
@@ -51,9 +51,6 @@ func newValidateCommand(globalOpts GlobalOptions) cli.AppSubCommand {
 	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
 	return subCmd
 }
-
-// IsValidationAware - implementing this method to indicate that this command cares for validation errors
-func (c *_ValidateCommand) IsValidationAware() bool { return true }
 
 func (c *_ValidateCommand) run(cmd *cobra.Command, args []string) (err error) {
 	valid := (c.globalOpts.ValidationError() == nil)

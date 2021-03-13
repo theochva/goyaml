@@ -6,12 +6,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/theochva/goyaml/yamldoc"
+	"github.com/theochva/goyaml/pkg/yamldoc"
 )
 
 // YamlFile - represents a yaml file
 type YamlFile interface {
 	yamldoc.YamlDoc
+
 	// Exists - Check whether the file actually exists
 	Exists() bool
 	// Filename - returns the filename
@@ -44,6 +45,22 @@ func New(filename string) YamlFile {
 	return result
 }
 
+// Load - create a new YamlFile and load YAML contents.
+//
+// If the file does not exist, then the YamlFile is empty and loaded=false.
+//
+// If the file exists and parsed successfully, then YamlFile is populated with the contents
+// of the YAML file and loaded=true.
+//
+// If an error occurs while opening or parsing the file then YamlFile=nil and "err" will
+// contain the error information.
+func Load(filename string) (loaded bool, yamlFile YamlFile, err error) {
+	yamlFile = New(filename)
+
+	loaded, err = yamlFile.Load()
+	return
+}
+
 // Exists - Check whether the file actually exists
 func (y *yamlFile) Exists() bool {
 	return fileExists(y.filename)
@@ -55,6 +72,14 @@ func (y *yamlFile) Filename() string {
 }
 
 // Load - loads the file (if it exists)
+//
+// If the file does not exist, then it returns loaded=false.
+//
+// If the file exists and parsed successfully, then YamlFile is populated with the contents
+// of the YAML file and loaded=true.
+//
+// If an error occurs while opening or parsing the file then YamlFile is unchanged and "err" will
+// contain the error information.
 func (y *yamlFile) Load() (loaded bool, err error) {
 	// If the file does not exist at this point,
 	if !y.Exists() {
@@ -73,11 +98,6 @@ func (y *yamlFile) Load() (loaded bool, err error) {
 	defer file.Close()
 
 	return y.LoadReader(file)
-	// if y.YamlDoc, err = yamldoc.New(file); err != nil {
-	// 	return false, err
-	// }
-
-	// return true, nil
 }
 
 // LoadReader - load from a reader

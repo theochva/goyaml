@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/theochva/goyaml/commands"
+	"github.com/theochva/goyaml/internal/commands"
 )
 
 var (

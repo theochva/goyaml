@@ -14,7 +14,16 @@ func (e *wrongTypeError) Error() string {
 	return fmt.Sprintf("Expected type '%s' but got '%s'", e.expectedType.String(), e.gotType.String())
 }
 
-// IsWrongTypeError - check if the error is a wrong type error
+// IsWrongTypeError - check if the error is a wrong type error.
+//
+// This type of error will occur when there is a type mismatch in the type of a YAML value with
+// respect to what you "requested" or expected the value to be.  For example:
+//
+// - calling the GetString() function with a key whose value is not actual a string type in the YAML
+// content, will raise this type of error.
+//
+// - Similarly, calling the GetBool() function with a key whose value is not actually a bool type in
+// the YAML content, will raise this type of error
 func IsWrongTypeError(err error) bool {
 	_, isWrongType := err.(*wrongTypeError)
 	return isWrongType

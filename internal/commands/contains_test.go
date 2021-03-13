@@ -14,8 +14,13 @@ func TestContainsCommand(t *testing.T) {
 
 var _ = Describe("Command 'contains' scenarios", func() {
 	When("No params specified", func() {
-		It("prints out help for the 'contains' command", func() {
+		It("prints out help for the 'contains' command with --help option", func() {
 			out, err := runCommand("", "contains", "--help")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(out).To(Equal(getHelpTextForCommand("contains")))
+		})
+		It("prints out help for the 'contains' command", func() {
+			out, err := runCommand("", "help", "contains")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(out).To(Equal(getHelpTextForCommand("contains")))
 		})

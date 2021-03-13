@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/theochva/goyaml/internal/tests"
-	"github.com/theochva/goyaml/yamldoc"
+	"github.com/theochva/goyaml/pkg/yamldoc"
 )
 
 const (
@@ -77,7 +77,7 @@ var _ = Describe("YamlFile functions", func() {
 				os.Remove(file.Name())
 			}
 		})
-		It("can load the file", func() {
+		It("can create a YamlFile and load the file", func() {
 			// create new yaml file
 			yamlFile = New(file.Name())
 
@@ -92,6 +92,18 @@ var _ = Describe("YamlFile functions", func() {
 			// check that it is loaded without errors
 			Expect(loaded).To(BeTrue())
 			Expect(err).ToNot(HaveOccurred())
+
+			// check the yaml file's text
+			checkText(yamlFile, yamlText)
+		})
+		It("can load the file", func() {
+			// Create and load a YAML file
+			loaded, yamlFile, err := Load(file.Name())
+
+			// check that it is loaded without errors
+			Expect(err).ToNot(HaveOccurred())
+			Expect(loaded).To(BeTrue())
+			Expect(yamlFile).ToNot(BeNil())
 
 			// check the yaml file's text
 			checkText(yamlFile, yamlText)

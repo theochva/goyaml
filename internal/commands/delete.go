@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/theochva/goyaml/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/cli"
 )
 
 type _DeleteCommand struct {
