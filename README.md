@@ -13,17 +13,16 @@ $ GO111MODULE=on GOSUMDB=off go get github.com/theochva/goyaml
 
 ## Installing the CLI
 
-For Mac OS, you can install the command via homebrew. Since this is hosted on the IBM Github server, you will need to specify a github token in the `HOMEBREW_GITHUB_API_TOKEN` environment variable.
+For Mac OS, you can install the command via homebrew:
 
 ```
 $ brew tap theochva/grizano
-$ export HOMEBREW_GITHUB_API_TOKEN=YOUR_GITHUB_TOKEN
 $ brew install goyaml
 ```
 
 Once already tapped and installed you can update using:
 ```
-$ HOMEBREW_GITHUB_API_TOKEN=YOUR_GITHUB_TOKEN brew upgrade goyaml
+$ brew upgrade goyaml
 ```
 
 Alternatively, you can download the latest release from https://github.com/theochva/goyaml/releases or install the latest using:
