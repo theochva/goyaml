@@ -34,6 +34,8 @@ type YamlDoc interface {
 	GetInt(key string) (value int, err error)
 	// GetBool - get the bool value at key from the yaml
 	GetBool(key string) (value bool, err error)
+	// GetObject - get a custom object at key.  The value is unmarshalled into the "obj" parameter
+	GetObject(key string, obj interface{}) (err error)
 	// Set - get a key from the yaml
 	Set(key string, value interface{}) (valueSet bool, err error)
 	// Delete - delete a key from the yaml
@@ -121,9 +123,6 @@ func (y *yamlDoc) Get(key string) (value interface{}, err error) {
 			if index == lastIndex {
 				break
 			}
-			if _, ok := value.(map[string]interface{}); ok {
-				fmt.Println("string map, key: ", key)
-			}
 			if mapValue, ok := value.(map[interface{}]interface{}); ok {
 				currData = mapValue
 			}
@@ -151,6 +150,25 @@ func (y *yamlDoc) Get(key string) (value interface{}, err error) {
 		}
 	}
 	return
+}
+
+// GetObject - get a custom object at key.  The value is unmarshalled into the "obj" parameter
+func (y *yamlDoc) GetObject(key string, obj interface{}) (err error) {
+	var (
+		value      interface{}
+		valueBytes []byte
+	)
+
+	if value, err = y.Get(key); err != nil {
+		return err
+	}
+	if valueBytes, err = yaml.Marshal(&value); err != nil {
+		return err
+	}
+	if err = yaml.Unmarshal(valueBytes, obj); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetString - get the string value at key from the yaml
