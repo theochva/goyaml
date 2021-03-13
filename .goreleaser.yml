@@ -47,7 +47,8 @@ brews:
     test: |
       system "#{bin}/goyaml --version"
     url_template: "https://github.com/theochva/goyaml/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    download_strategy: CustomGitHubPrivateRepositoryReleaseDownloadStrategy
+    download_strategy: CurlDownloadStrategy
+    # download_strategy: CustomGitHubPrivateRepositoryReleaseDownloadStrategy
     custom_require: "./download_strategies/custom_download_strategy"
     install: |
       bin.install "goyaml"
