@@ -15,36 +15,14 @@ const (
 a:
   b:
     c: value-c
+  custom:
+    bool-prop: true
+    int-prop: 100
+    string-prop: string-value
   d:
     e: false
     f: 10
 `
-)
-
-var (
-	yamlText = strings.TrimSpace(_SampleYaml)
-	yamlMap  = map[interface{}]interface{}{
-		"a": map[interface{}]interface{}{
-			"b": map[interface{}]interface{}{
-				"c": "value-c",
-			},
-			"d": map[interface{}]interface{}{
-				"e": false,
-				"f": 10,
-			},
-		},
-	}
-	yamlStringMap = map[string]interface{}{
-		"a": map[string]interface{}{
-			"b": map[string]interface{}{
-				"c": "value-c",
-			},
-			"d": map[string]interface{}{
-				"e": false,
-				"f": 10,
-			},
-		},
-	}
 )
 
 func TestYamlDoc(t *testing.T) {
@@ -120,7 +98,7 @@ func checkText(yaml YamlDoc, expectedText string) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(text).To(Equal(expectedText))
 }
-func checkSampleYaml(yaml YamlDoc) {
+func checkSampleYaml(yaml YamlDoc, yamlText string) {
 	// Check data map has one key
 	Expect(len(yaml.Data())).To(Equal(1))
 	// Check that it contains the single entry
@@ -164,7 +142,64 @@ func checkSampleYaml(yaml YamlDoc) {
 }
 
 var _ = Describe("Yaml functions", func() {
-	var yaml YamlDoc
+	var (
+		yaml     YamlDoc
+		yamlText = strings.TrimSpace(_SampleYaml)
+		yamlMap  = map[interface{}]interface{}{
+			"a": map[interface{}]interface{}{
+				"b": map[interface{}]interface{}{
+					"c": "value-c",
+				},
+				"custom": map[interface{}]interface{}{
+					"string-prop": "string-value",
+					"int-prop":    100,
+					"bool-prop":   true,
+				},
+				"d": map[interface{}]interface{}{
+					"e": false,
+					"f": 10,
+				},
+			},
+		}
+		yamlStringMap = map[string]interface{}{
+			"a": map[string]interface{}{
+				"b": map[string]interface{}{
+					"c": "value-c",
+				},
+				"custom": map[string]interface{}{
+					"string-prop": "string-value",
+					"int-prop":    100,
+					"bool-prop":   true,
+				},
+				"d": map[string]interface{}{
+					"e": false,
+					"f": 10,
+				},
+			},
+		}
+		newCustomStruct = func() struct {
+			StringProp string `yaml:"string-prop"`
+			IntProp    int    `yaml:"int-prop"`
+			BoolProp   bool   `yaml:"bool-prop"`
+		} {
+			return struct {
+				StringProp string `yaml:"string-prop"`
+				IntProp    int    `yaml:"int-prop"`
+				BoolProp   bool   `yaml:"bool-prop"`
+			}{}
+		}
+		expectedCustomStruct = func() struct {
+			StringProp string `yaml:"string-prop"`
+			IntProp    int    `yaml:"int-prop"`
+			BoolProp   bool   `yaml:"bool-prop"`
+		} {
+			obj := newCustomStruct()
+			obj.StringProp = "string-value"
+			obj.IntProp = 100
+			obj.BoolProp = true
+			return obj
+		}
+	)
 
 	Context("Read existing string text", func() {
 		BeforeEach(func() {
@@ -175,7 +210,7 @@ var _ = Describe("Yaml functions", func() {
 		})
 
 		It("Check sample yaml", func() {
-			checkSampleYaml(yaml)
+			checkSampleYaml(yaml, yamlText)
 		})
 	})
 	Context("Start with empty then set values from map", func() {
@@ -195,7 +230,7 @@ var _ = Describe("Yaml functions", func() {
 		})
 
 		It("Check sample yaml", func() {
-			checkSampleYaml(yaml)
+			checkSampleYaml(yaml, yamlText)
 		})
 
 		It("can convert to map[string]interface{}", func() {
@@ -203,6 +238,15 @@ var _ = Describe("Yaml functions", func() {
 			converted, strYamlMap := yaml.Map()
 			Expect(converted).To(BeTrue())
 			Expect(reflect.DeepEqual(strYamlMap, yamlStringMap)).To(BeTrue())
+		})
+		It("can read custom object", func() {
+			obj := newCustomStruct()
+			expectedObj := expectedCustomStruct()
+			err := yaml.GetObject("a.custom", &obj)
+			Expect(err).ToNot(HaveOccurred())
+			fmt.Printf("obj: [strValue: %s] [intValue: %d] [boolValue: %v]\n", obj.StringProp, obj.IntProp, obj.BoolProp)
+			fmt.Printf("obj: [strValue: %s] [intValue: %d] [boolValue: %v]\n", expectedObj.StringProp, expectedObj.IntProp, expectedObj.BoolProp)
+			Expect(reflect.DeepEqual(obj, expectedObj)).To(BeTrue())
 		})
 	})
 })
