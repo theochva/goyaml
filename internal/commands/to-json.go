@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/theochva/goyaml/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/cli"
 )
 
 type _ToJSONCommand struct {

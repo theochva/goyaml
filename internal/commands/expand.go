@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/theochva/goyaml/commands/cli"
-	"github.com/theochva/goyaml/commands/internal"
+	"github.com/theochva/goyaml/internal/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/utils"
 )
 
 type _ExpandCommand struct {
@@ -116,11 +116,11 @@ func (c *_ExpandCommand) validateAndPreProcessParams(cmd *cobra.Command, args []
 
 func (c *_ExpandCommand) run(cmd *cobra.Command, args []string) (err error) {
 	var (
-		tmpl      internal.TemplateWrapper
+		tmpl      utils.TemplateWrapper
 		fileCount = 0
 	)
 
-	tmpl = internal.NewTemplateWrapper(c.outputFormat)
+	tmpl = utils.NewTemplateWrapper(c.outputFormat)
 
 	if c.templateText != "" {
 		if err = tmpl.NewTextTemplate(c.templateText); err != nil {
@@ -128,14 +128,14 @@ func (c *_ExpandCommand) run(cmd *cobra.Command, args []string) (err error) {
 		}
 	} else {
 		for _, templateFile := range c.templateFiles {
-			if !internal.FileOrDirectoryExists(templateFile) {
+			if !utils.FileOrDirectoryExists(templateFile) {
 				return fmt.Errorf("Template file '%s' does not exist", templateFile)
 			}
 		}
 
 		// Parse templates
 		for _, templateFile := range c.templateFiles {
-			if internal.IsDirectory(templateFile) {
+			if utils.IsDirectory(templateFile) {
 				for _, ext := range c.extensions {
 					var (
 						filenames []string

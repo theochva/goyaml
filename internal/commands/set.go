@@ -9,14 +9,12 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/theochva/goyaml/commands/cli"
+	"github.com/theochva/goyaml/internal/commands/cli"
 	"gopkg.in/yaml.v2"
 )
 
 type _SetCommand struct {
 	cli.AppSubCommand
-	SkipParsingCommand
-	ValidationErrorAwareCommand
 
 	globalOpts  GlobalOptions
 	valueType   string
@@ -51,8 +49,12 @@ func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
   $PROG_NAME -f|--file <yaml-file> set <key> --stdin [-t|--type %s]
   $PROG_NAME [-f|--file <yaml-file>] set <key> -i|--input <value-file> [-t|--type %s]`, validTypesWithOr, validTypesWithOr, validTypesWithOr),
 		DisableFlagsInUseLine: true,
-		Aliases:               []string{"s"},
-		Short:                 "Set a value in a YAML document",
+		Annotations: map[string]string{
+			_CmdOptValidationAware: _CmdOptValueTrue,
+			_CmdOptSkipParsing:     _CmdOptValueTrue,
+		},
+		Aliases: []string{"s"},
+		Short:   "Set a value in a YAML document",
 		Long: `Set a value in a YAML document. There are multiple ways you can set values in a YAML document:
   - Set a value in a YAML file with a value specified, read from a file or read from stdin  
   - Update a value in a YAML document read from stdin with a value specified or read from a file and print result to stdout`,
@@ -124,12 +126,6 @@ func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
 	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
 	return subCmd
 }
-
-// ShouldSkipParsing - implementing this method to indicate that this command wants to take care of the parsing
-func (c *_SetCommand) ShouldSkipParsing() bool { return true }
-
-// IsValidationAware - implementing this method to indicate that this command cares for validation errors
-func (c *_SetCommand) IsValidationAware() bool { return true }
 
 func (c *_SetCommand) validateAndPreProcessParams(cmd *cobra.Command, args []string) error {
 	// First check if file specified with -f or if value to set is not comming from stdin

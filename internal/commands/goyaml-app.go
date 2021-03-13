@@ -2,23 +2,9 @@ package commands
 
 import (
 	"github.com/pkg/errors"
-	"github.com/theochva/goyaml/commands/cli"
-	"github.com/theochva/goyaml/yamlfile"
+	"github.com/theochva/goyaml/internal/commands/cli"
+	"github.com/theochva/goyaml/pkg/yamlfile"
 )
-
-// ValidationErrorAwareCommand - sub commands implement this interface when they
-// want to be aware of YAML validation errors
-type ValidationErrorAwareCommand interface {
-	// IsValidationAware - return true if it needs to be validation aware
-	IsValidationAware() bool
-}
-
-// SkipParsingCommand - sub commands implement this interface when they
-// want to skip the initial parsing of the YAML file (i.e. do their own parsing)
-type SkipParsingCommand interface {
-	// ShouldSkipParsing - whether the input YAML should not be parsed up-front but parsed by the subcommand
-	ShouldSkipParsing() bool
-}
 
 // GlobalOptions - global options that are needed to be accessed by all subcommands
 type GlobalOptions interface {
@@ -80,6 +66,7 @@ func NewGoyamlApp(version, commit, date string) *cli.App {
 		newFromJSONCommand(rootCmd.GlobalOpts()),
 		newToJSONCommand(rootCmd.GlobalOpts()),
 		newExpandCommand(rootCmd.GlobalOpts()),
+		// newCompletionCommand(rootCmd.GlobalOpts()),
 	)
 	return cli.NewApp(rootCmd)
 }

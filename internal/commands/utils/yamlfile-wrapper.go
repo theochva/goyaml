@@ -1,12 +1,12 @@
-package internal
+package utils
 
 import (
 	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
-	"github.com/theochva/goyaml/yamldoc"
-	"github.com/theochva/goyaml/yamlfile"
+	"github.com/theochva/goyaml/pkg/yamldoc"
+	"github.com/theochva/goyaml/pkg/yamlfile"
 )
 
 // YamlFileWrapper - simple wrapper that can either read from STDIN and
