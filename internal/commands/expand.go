@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/theochva/go-misc/pkg/osext"
+	"github.com/theochva/go-misc/pkg/strext"
 	"github.com/theochva/goyaml/internal/commands/cli"
 	"github.com/theochva/goyaml/internal/commands/utils"
 )
@@ -93,8 +95,8 @@ func newExpandCommand(globalOpts GlobalOptions) cli.AppSubCommand {
 }
 
 func (c *_ExpandCommand) validateAndPreProcessParams(cmd *cobra.Command, args []string) error {
-	c.templateFiles = splitAndTrim(c.optTemplateFile)
-	c.extensions = splitAndTrim(c.optExtensions)
+	c.templateFiles = strext.Trim(strings.Split(c.optTemplateFile, ","))
+	c.extensions = strext.Trim(strings.Split(c.optExtensions, ","))
 
 	if c.templateText == "" && len(c.templateFiles) == 0 {
 		return fmt.Errorf("One of the '-%s|--%s' or '--%s' is required", _flagTemplateShort, _flagTemplate, _flagText)
@@ -128,14 +130,14 @@ func (c *_ExpandCommand) run(cmd *cobra.Command, args []string) (err error) {
 		}
 	} else {
 		for _, templateFile := range c.templateFiles {
-			if !utils.FileOrDirectoryExists(templateFile) {
+			if !osext.FileOrDirectoryExists(templateFile) {
 				return fmt.Errorf("Template file '%s' does not exist", templateFile)
 			}
 		}
 
 		// Parse templates
 		for _, templateFile := range c.templateFiles {
-			if utils.IsDirectory(templateFile) {
+			if osext.IsDirectory(templateFile) {
 				for _, ext := range c.extensions {
 					var (
 						filenames []string

@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/theochva/go-misc/pkg/osext"
 	"github.com/theochva/goyaml/pkg/yamldoc"
 )
 
@@ -63,7 +64,7 @@ func Load(filename string) (loaded bool, yamlFile YamlFile, err error) {
 
 // Exists - Check whether the file actually exists
 func (y *yamlFile) Exists() bool {
-	return fileExists(y.filename)
+	return osext.FileExists(y.filename)
 }
 
 // Filename - returns the filename

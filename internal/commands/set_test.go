@@ -8,7 +8,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/theochva/goyaml/internal/tests"
+
+	"github.com/theochva/go-misc/pkg/osext"
 )
 
 // TestSetCommand - test suite for the set command
@@ -55,7 +56,7 @@ a:
 		var workFile *os.File
 		BeforeEach(func() {
 			var err error
-			workFile, err = tests.CreateTempFileWithContents("workfile*.yaml", _SampleYAML)
+			workFile, err = osext.CreateTempWithContents("", "workfile*.yaml", []byte(_SampleYAML), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(workFile).ToNot(BeNil())
 		})
@@ -93,7 +94,7 @@ a:
 					}
 					Expect(err).ToNot(HaveOccurred())
 					Expect(out).To(Equal("true"))
-					updatedContent, err = tests.ReadFileToString(workFile.Name(), true)
+					updatedContent, err = osext.ReadFileAsString(workFile.Name(), true)
 					Expect(err).ToNot(HaveOccurred())
 					expectedContent := strings.Join([]string{valuesAsYAML[index], _SampleYAML}, "\n")
 					Expect(updatedContent).To(Equal(expectedContent))
@@ -135,7 +136,7 @@ a:
 					description = fmt.Sprintf("Set the value as '%s' in the YAML file", types[index])
 				}
 				It(description, func() {
-					valueFile, err2 := tests.CreateTempFileWithContents("valuesTest*.txt", values[index])
+					valueFile, err2 := osext.CreateTempWithContents("", "valuesTest*.txt", []byte(values[index]), 0644)
 					Expect(err2).ToNot(HaveOccurred())
 					Expect(valueFile).ToNot(BeNil())
 					filesToDel = append(filesToDel, valueFile)
@@ -147,7 +148,7 @@ a:
 					}
 					Expect(err).ToNot(HaveOccurred())
 					Expect(out).To(Equal("true"))
-					updatedContent, err = tests.ReadFileToString(workFile.Name(), true)
+					updatedContent, err = osext.ReadFileAsString(workFile.Name(), true)
 					Expect(err).ToNot(HaveOccurred())
 					expectedContent := strings.Join([]string{valuesAsYAML[index], _SampleYAML}, "\n")
 					Expect(updatedContent).To(Equal(expectedContent))
@@ -183,7 +184,7 @@ a:
 					}
 					Expect(err).ToNot(HaveOccurred())
 					Expect(out).To(Equal("true"))
-					updatedContent, err = tests.ReadFileToString(workFile.Name(), true)
+					updatedContent, err = osext.ReadFileAsString(workFile.Name(), true)
 					Expect(err).ToNot(HaveOccurred())
 					expectedContent := strings.Join([]string{valuesAsYAML[index], _SampleYAML}, "\n")
 					Expect(updatedContent).To(Equal(expectedContent))
@@ -319,7 +320,7 @@ a:
 					description = fmt.Sprintf("Set the value as '%s' in the YAML file", types[index])
 				}
 				It(description, func() {
-					valueFile, err2 := tests.CreateTempFileWithContents("valuesTest*.txt", values[index])
+					valueFile, err2 := osext.CreateTempWithContents("", "valuesTest*.txt", []byte(values[index]), 0644)
 					Expect(err2).ToNot(HaveOccurred())
 					Expect(valueFile).ToNot(BeNil())
 					filesToDel = append(filesToDel, valueFile)

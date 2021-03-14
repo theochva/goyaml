@@ -7,7 +7,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/theochva/goyaml/internal/tests"
+
+	"github.com/theochva/go-misc/pkg/osext"
 )
 
 // TestDeleteCommand - test suite for the delete command
@@ -41,11 +42,11 @@ bird-food:
 	BeforeEach(func() {
 		var err error
 
-		testExtraYAMLFile, err = tests.CreateTempFileWithContents("testExtra*.yaml", _SampleExtraYAML)
+		testExtraYAMLFile, err = osext.CreateTempWithContents("", "testExtra*.yaml", []byte(_SampleExtraYAML), 0644)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(testExtraYAMLFile).ToNot(BeNil())
 
-		testExtraJSONFile, err = tests.CreateTempFileWithContents("testExtra*.json", _SampleExtraJSON)
+		testExtraJSONFile, err = osext.CreateTempWithContents("", "testExtra*.json", []byte(_SampleExtraJSON), 0644)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(testExtraJSONFile).ToNot(BeNil())
 	})
@@ -98,7 +99,7 @@ bird-food:
 		BeforeEach(func() {
 			var err error
 			testDelText = strings.Join([]string{_SampleExtraYAML, _SampleYAML}, "\n")
-			testDelFile, err = tests.CreateTempFileWithContents("testdel*.yaml", testDelText)
+			testDelFile, err = osext.CreateTempWithContents("", "testdel*.yaml", []byte(testDelText), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(testDelFile).ToNot(BeNil())
 		})
@@ -113,7 +114,7 @@ bird-food:
 			Expect(err).ToNot(HaveOccurred())
 			Expect(out).To(Equal("true"))
 			// Read the updated file's contents
-			contents, err := tests.ReadFileToString(testDelFile.Name(), true)
+			contents, err := osext.ReadFileAsString(testDelFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			// The text should be minus the "extra" yaml
 			Expect(contents).To(Equal(_SampleYAML))
@@ -123,7 +124,7 @@ bird-food:
 			out, err := runCommand("", "-f", testDelFile.Name(), "delete", _SampleYAMLNonExistingKey)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(out).To(Equal("false"))
-			contents, err := tests.ReadFileToString(testDelFile.Name(), true)
+			contents, err := osext.ReadFileAsString(testDelFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			// Since nothing deleted, the file contents should be same as originally
 			Expect(contents).To(Equal(testDelText))

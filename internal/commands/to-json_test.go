@@ -6,7 +6,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/theochva/goyaml/internal/tests"
+
+	"github.com/theochva/go-misc/pkg/osext"
 )
 
 // TestToJSONCommand - test suite for the to-json command
@@ -55,7 +56,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 
 		BeforeEach(func() {
 			var err error
-			outFile, err = tests.CreateTempFile("testout*.json")
+			outFile, err = os.CreateTemp("", "testout*.json")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFile).ToNot(BeNil())
 		})
@@ -71,7 +72,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 			Expect(out).To(BeEmpty())
 
 			var outFileText string
-			outFileText, err = tests.ReadFileToString(outFile.Name(), true)
+			outFileText, err = osext.ReadFileAsString(outFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFileText).To(Equal(_SampleJSONCompact))
 		})
@@ -82,7 +83,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 			Expect(out).To(BeEmpty())
 
 			var outFileText string
-			outFileText, err = tests.ReadFileToString(outFile.Name(), true)
+			outFileText, err = osext.ReadFileAsString(outFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFileText).To(Equal(_SampleJSON))
 		})
@@ -93,7 +94,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 
 		BeforeEach(func() {
 			var err error
-			outFile, err = tests.CreateTempFile("testout*.json")
+			outFile, err = os.CreateTemp("", "testout*.json")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFile).ToNot(BeNil())
 		})
@@ -109,7 +110,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 			Expect(out).To(BeEmpty())
 
 			var outFileText string
-			outFileText, err = tests.ReadFileToString(outFile.Name(), true)
+			outFileText, err = osext.ReadFileAsString(outFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFileText).To(Equal(_SampleJSONCompact))
 		})
@@ -120,7 +121,7 @@ var _ = Describe("Command 'to-json' scenarios", func() {
 			Expect(out).To(BeEmpty())
 
 			var outFileText string
-			outFileText, err = tests.ReadFileToString(outFile.Name(), true)
+			outFileText, err = osext.ReadFileAsString(outFile.Name(), true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(outFileText).To(Equal(_SampleJSON))
 		})
