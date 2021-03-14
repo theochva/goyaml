@@ -244,8 +244,6 @@ var _ = Describe("Yaml functions", func() {
 			expectedObj := expectedCustomStruct()
 			err := yaml.GetObject("a.custom", &obj)
 			Expect(err).ToNot(HaveOccurred())
-			fmt.Printf("obj: [strValue: %s] [intValue: %d] [boolValue: %v]\n", obj.StringProp, obj.IntProp, obj.BoolProp)
-			fmt.Printf("obj: [strValue: %s] [intValue: %d] [boolValue: %v]\n", expectedObj.StringProp, expectedObj.IntProp, expectedObj.BoolProp)
 			Expect(reflect.DeepEqual(obj, expectedObj)).To(BeTrue())
 		})
 	})

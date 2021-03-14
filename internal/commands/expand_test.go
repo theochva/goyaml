@@ -9,7 +9,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/theochva/goyaml/internal/tests"
+
+	"github.com/theochva/go-misc/pkg/osext"
 )
 
 // TestExpandCommand - test suite for the expand command
@@ -97,10 +98,10 @@ END file: simple.tmpl
 		var valuesFile, templateFile *os.File
 		BeforeEach(func() {
 			var err error
-			valuesFile, err = tests.CreateTempFileWithContents("sampleValues*.tmpl", _SampleTemplateValues)
+			valuesFile, err = osext.CreateTempWithContents("", "sampleValues*.tmpl", []byte(_SampleTemplateValues), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(valuesFile).ToNot(BeNil())
-			templateFile, err = tests.CreateTempFileWithContents("sampleTemplate*.tmpl", _SampleInlineTemplateText)
+			templateFile, err = osext.CreateTempWithContents("", "sampleTemplate*.tmpl", []byte(_SampleInlineTemplateText), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(valuesFile).ToNot(BeNil())
 		})
@@ -215,7 +216,7 @@ END file: simple.tmpl
 		var valuesFile *os.File
 		BeforeEach(func() {
 			var err error
-			valuesFile, err = tests.CreateTempFileWithContents("sampleValues*.tmpl", _SampleTemplateValues)
+			valuesFile, err = osext.CreateTempWithContents("", "sampleValues*.tmpl", []byte(_SampleTemplateValues), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(valuesFile).ToNot(BeNil())
 		})
@@ -326,19 +327,19 @@ END file: simple.tmpl
 		)
 		BeforeEach(func() {
 			var err error
-			valuesFile, err = tests.CreateTempFileWithContents("sampleValues*.tmpl", _SampleTemplateValues)
+			valuesFile, err = osext.CreateTempWithContents("", "sampleValues*.tmpl", []byte(_SampleTemplateValues), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(valuesFile).ToNot(BeNil())
-			mainTemplateFile, err = tests.CreateTempFileWithContents("sampleTmpl*.tmpl", _SampleTemplateText)
+			mainTemplateFile, err = osext.CreateTempWithContents("", "sampleTmpl*.tmpl", []byte(_SampleTemplateText), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(mainTemplateFile).ToNot(BeNil())
-			invalidMainTemplateFile, err = tests.CreateTempFileWithContents("invalidSampleTmpl*.tmpl", "{{if}"+_SampleTemplateText)
+			invalidMainTemplateFile, err = osext.CreateTempWithContents("", "invalidSampleTmpl*.tmpl", []byte("{{if}"+_SampleTemplateText), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(invalidMainTemplateFile).ToNot(BeNil())
-			template3File, err = tests.CreateTempFileWithContents("sample3Tmpl*.templ", _SampleTemplate3Text)
+			template3File, err = osext.CreateTempWithContents("", "sample3Tmpl*.templ", []byte(_SampleTemplate3Text), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(template3File).ToNot(BeNil())
-			template4File, err = tests.CreateTempFileWithContents("sample4Tmpl*.template", _SampleTemplate4Text)
+			template4File, err = osext.CreateTempWithContents("", "sample4Tmpl*.template", []byte(_SampleTemplate4Text), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(template4File).ToNot(BeNil())
 			os.Setenv(_SampleTemplateEnvVarName, _SampleTemplateEnvVarValue)

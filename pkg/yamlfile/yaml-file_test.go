@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/theochva/goyaml/internal/tests"
+	"github.com/theochva/go-misc/pkg/osext"
 	"github.com/theochva/goyaml/pkg/yamldoc"
 )
 
@@ -68,7 +68,7 @@ var _ = Describe("YamlFile functions", func() {
 		BeforeEach(func() {
 			var err error
 
-			file, err = tests.CreateTempFileWithContents("test*.yaml", yamlText)
+			file, err = osext.CreateTempWithContents("", "test*.yaml", []byte(yamlText), 0644)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(file).ToNot(BeNil())
 		})

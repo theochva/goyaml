@@ -12,8 +12,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
+	"github.com/theochva/go-misc/pkg/osext"
 	"github.com/theochva/goyaml/internal/commands/cli"
-	"github.com/theochva/goyaml/internal/tests"
 )
 
 var (
@@ -169,15 +169,15 @@ func runCommand(input string, args ...string) (string, error) {
 var _ = BeforeSuite(func() {
 	var err error
 
-	testNonYAMLFile, err = tests.CreateTempFileWithContents("test*.txt", _SampleNonYAML)
+	testNonYAMLFile, err = osext.CreateTempWithContents("", "test*.txt", []byte(_SampleNonYAML), 0644)
 	Expect(err).ToNot(HaveOccurred())
 	Expect(testNonYAMLFile).ToNot(BeNil())
 
-	testYAMLFile, err = tests.CreateTempFileWithContents("test*.yaml", _SampleYAML)
+	testYAMLFile, err = osext.CreateTempWithContents("", "test*.yaml", []byte(_SampleYAML), 0644)
 	Expect(err).ToNot(HaveOccurred())
 	Expect(testYAMLFile).ToNot(BeNil())
 
-	testJSONFile, err = tests.CreateTempFileWithContents("test*.json", _SampleJSON)
+	testJSONFile, err = osext.CreateTempWithContents("", "test*.json", []byte(_SampleJSON), 0644)
 	Expect(err).ToNot(HaveOccurred())
 	Expect(testJSONFile).ToNot(BeNil())
 })

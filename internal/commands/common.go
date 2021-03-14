@@ -100,21 +100,6 @@ func marshalToJSON(v interface{}, indent bool) (bytes []byte, err error) {
 	return
 }
 
-func splitAndTrim(valuesStr string) (values []string) {
-	if valuesStr == "" {
-		return
-	}
-	currValues := strings.Split(valuesStr, ",")
-
-	for _, value := range currValues {
-		if trimmedValue := strings.TrimSpace(value); trimmedValue != "" {
-			values = append(values, trimmedValue)
-		}
-	}
-
-	return
-}
-
 func convertBytes(bytes []byte, valueType string) (actualValue interface{}, err error) {
 	switch valueType {
 	case _FormatText:
