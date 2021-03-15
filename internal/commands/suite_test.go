@@ -17,10 +17,8 @@ import (
 )
 
 var (
-	_SampleYAMLExistingKey         = "xmas-fifth-day.calling-birds"
-	_SampleYAMLExistingValue       = "four"
-	_SampleYAMLExistingValueAsJSON = "\"four\""
-	_SampleYAMLExistingValueAsYAML = "four"
+	_SampleYAMLExistingKey   = "xmas-fifth-day.calling-birds"
+	_SampleYAMLExistingValue = "four"
 
 	_SampleYAMLExistingBoolKey         = "xmas"
 	_SampleYAMLExistingBoolValue       = "true"
@@ -29,7 +27,6 @@ var (
 
 	_SampleYAMLExistingIntKey         = "xmas-fifth-day.golden-rings"
 	_SampleYAMLExistingIntValue       = "5"
-	_SampleYAMLExistingIntValueAsJSON = "5"
 	_SampleYAMLExistingIntValueAsYAML = "5"
 
 	_SampleYAMLExistingArrayKey         = "calling-birds"

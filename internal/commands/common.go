@@ -46,16 +46,9 @@ const (
 
 var (
 	// ErrUnsupportedOutputFormat - when an unknown output format was specified
-	ErrUnsupportedOutputFormat = fmt.Errorf("Unsupport output format.  Supported values are: %s", strings.Join(outputFormatValues, ", "))
+	ErrUnsupportedOutputFormat = fmt.Errorf("unsupport output format.  Supported values are: %s", strings.Join(outputFormatValues, ", "))
 	outputFormatValues         = []string{_FormatJSON, _FormatYAML}
 )
-
-func getOutputFormat(outputFormat string) string {
-	if outputFormat == "" {
-		return _FormatYAML
-	}
-	return outputFormat
-}
 
 func validateEnumValues(userValue, errPrefix string, validValues []string) error {
 	if userValue != "" {

@@ -37,39 +37,39 @@ const (
 
 var validValueTypes = []string{_ValueTypeString, _ValueTypeInt, _ValueTypeBool, _ValueTypeJSON, _ValueTypeYAML}
 
-// newSetCommand - create the "set" subcommand
-func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
-	subCmd := &_SetCommand{
-		globalOpts: globalOpts,
-	}
+func init() {
+	registerCommand(func(globalOpts GlobalOptions) cli.AppSubCommand {
+		subCmd := &_SetCommand{
+			globalOpts: globalOpts,
+		}
 
-	validTypesWithOr := strings.Join(validValueTypes, "|")
-	cliCmd := &cobra.Command{
-		Use: cli.ReplaceProgName(`set <key> <value> [-t|--type %s]
+		validTypesWithOr := strings.Join(validValueTypes, "|")
+		cliCmd := &cobra.Command{
+			Use: cli.ReplaceProgName(`set <key> <value> [-t|--type %s]
   $PROG_NAME -f|--file <yaml-file> set <key> --stdin [-t|--type %s]
   $PROG_NAME [-f|--file <yaml-file>] set <key> -i|--input <value-file> [-t|--type %s]`, validTypesWithOr, validTypesWithOr, validTypesWithOr),
-		DisableFlagsInUseLine: true,
-		Annotations: map[string]string{
-			_CmdOptValidationAware: _CmdOptValueTrue,
-			_CmdOptSkipParsing:     _CmdOptValueTrue,
-		},
-		Aliases: []string{"s"},
-		Short:   "Set a value in a YAML document",
-		Long: `Set a value in a YAML document. There are multiple ways you can set values in a YAML document:
+			DisableFlagsInUseLine: true,
+			Annotations: map[string]string{
+				_CmdOptValidationAware: _CmdOptValueTrue,
+				_CmdOptSkipParsing:     _CmdOptValueTrue,
+			},
+			Aliases: []string{"s"},
+			Short:   "Set a value in a YAML document",
+			Long: `Set a value in a YAML document. There are multiple ways you can set values in a YAML document:
   - Set a value in a YAML file with a value specified, read from a file or read from stdin  
   - Update a value in a YAML document read from stdin with a value specified or read from a file and print result to stdout`,
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return fmt.Errorf("requires the 'key' for the value to be set")
-			} else if len(args) > 2 {
-				return fmt.Errorf("too many arguments")
-			}
-			return nil
-		},
-		ArgAliases: []string{"key", "value"},
-		PreRunE:    subCmd.validateAndPreProcessParams,
-		RunE:       subCmd.run,
-		Example: cli.ReplaceProgName(`  Update a YAML file with a value specified as a parameter:
+			Args: func(cmd *cobra.Command, args []string) error {
+				if len(args) < 1 {
+					return fmt.Errorf("requires the 'key' for the value to be set")
+				} else if len(args) > 2 {
+					return fmt.Errorf("too many arguments")
+				}
+				return nil
+			},
+			ArgAliases: []string{"key", "value"},
+			PreRunE:    subCmd.validateAndPreProcessParams,
+			RunE:       subCmd.run,
+			Example: cli.ReplaceProgName(`  Update a YAML file with a value specified as a parameter:
     $PROG_NAME -f /tmp/foo.yaml set first.second.strProp "someValue"
     $PROG_NAME -f /tmp/foo.yaml set first.second.intProp 10 -t int
     $PROG_NAME -f /tmp/foo.yaml set first.second.boolProp true -t bool
@@ -79,12 +79,12 @@ func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: str-value" -t yaml
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: 100" -t yaml
     $PROG_NAME -f /tmp/foo.yaml set first.second.third "prop1: true" -t yaml
-
+	
   Update a YAML file with a value read from another file:
     $PROG_NAME -f /tmp/foo.yaml set first.second.third -i /tmp/foo.json -t json
     $PROG_NAME -f /tmp/foo.yaml set first.second.third -i /tmp/bar.yaml -t yaml
     $PROG_NAME -f /tmp/foo.yaml set first.second.privateKey -i .ssh/id_rsa_priv
-
+	
   Update YAML read from stdin with a value specified as a parameter and print result to stdout:
     cat /tmp/foo.yaml | $PROG_NAME set first.second.strProp "someValue"
     cat /tmp/foo.yaml | $PROG_NAME set first.second.intProp 10 -t int
@@ -95,47 +95,49 @@ func newSetCommand(globalOpts GlobalOptions) cli.AppSubCommand {
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: str-value" -t yaml
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: 100" -t yaml
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third "prop1: true" -t yaml
-
+	
   Update YAML read from stdin with a value read from another file and print result to stdout:
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third -i /tmp/foo.json -t json
     cat /tmp/foo.yaml | $PROG_NAME set first.second.third -i /tmp/bar.yaml -t yaml
     cat /tmp/foo.yaml | $PROG_NAME set first.second.privateKey -i .ssh/id_rsa_priv
-
+	
   Generate YAML to stdout with a value read from stdin:
     cat /tmp/foo.json | $PROG_NAME set first.second.third --stdin -t json
     cat /tmp/bar.yaml | $PROG_NAME set first.second.third --stdin -t yaml
     cat ~/.ssh/id_rsa_priv | $PROG_NAME set first.second.privateKey --stdin`),
-	}
+		}
 
-	cliCmd.Flags().StringVarP(
-		&subCmd.valueType,
-		_flagType, _flagTypeShort, _ValueTypeString,
-		"the value type to set. Valid values are: "+strings.Join(validValueTypes, ", "),
-	)
-	cliCmd.Flags().BoolVarP(
-		&subCmd.readStdin,
-		_flagStdin, "", false,
-		"read stdin for the value to set",
-	)
-	cliCmd.Flags().StringVarP(
-		&subCmd.inputFile,
-		_flagInput, _flagInputShort, "",
-		"the file containing the value to set",
-	)
+		cliCmd.Flags().StringVarP(
+			&subCmd.valueType,
+			_flagType, _flagTypeShort, _ValueTypeString,
+			"the value type to set. Valid values are: "+strings.Join(validValueTypes, ", "),
+		)
+		cliCmd.Flags().BoolVarP(
+			&subCmd.readStdin,
+			_flagStdin, "", false,
+			"read stdin for the value to set",
+		)
+		cliCmd.Flags().StringVarP(
+			&subCmd.inputFile,
+			_flagInput, _flagInputShort, "",
+			"the file containing the value to set",
+		)
 
-	subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
-	return subCmd
+		subCmd.AppSubCommand = cli.NewAppSubCommandBase(cliCmd)
+		return subCmd
+
+	})
 }
 
 func (c *_SetCommand) validateAndPreProcessParams(cmd *cobra.Command, args []string) error {
-	// First check if file specified with -f or if value to set is not comming from stdin
+	// First check if file specified with -f or if value to set is not coming from stdin
 	if !c.globalOpts.IsPipe() || !c.readStdin {
 		if err := c.globalOpts.Load(); err != nil {
 			return err
 		}
 	}
 	multiSourceErr := fmt.Errorf(
-		"Must select only one source of the value to set. It can be specified either via "+
+		"must select only one source of the value to set. It can be specified either via "+
 			"the \"value\" argument, the flag '-%s|--%s' or the flag '--%s'", _flagInputShort, _flagInput, _flagStdin)
 	if len(args) == 2 {
 		c.valueSource = _ValueSourceArg
@@ -155,7 +157,7 @@ func (c *_SetCommand) validateAndPreProcessParams(cmd *cobra.Command, args []str
 		c.valueSource = _ValueSourceStdin
 	}
 	if c.valueSource == "" {
-		return fmt.Errorf("Must clearly specify the source of the value to set. It can be specified either via "+
+		return fmt.Errorf("must clearly specify the source of the value to set. It can be specified either via "+
 			"the \"value\" argument, the flag '-%s|--%s' or the flag '--%s'", _flagInputShort, _flagInput, _flagStdin)
 	}
 

@@ -25,7 +25,7 @@ var _ = Describe("Command 'contains' scenarios", func() {
 			Expect(out).To(Equal(getHelpTextForCommand("contains")))
 		})
 	})
-	When("Source YAML is comming from STDIN", func() {
+	When("Source YAML is coming from STDIN", func() {
 		It("prints 'true' when the specified key exists in the YAML content", func() {
 			// cat file.yaml | goyaml contains some.key
 			out, err := runCommand(_SampleYAML, "contains", _SampleYAMLExistingKey)

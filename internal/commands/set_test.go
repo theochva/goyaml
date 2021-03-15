@@ -236,13 +236,13 @@ a:
 				Expect(err).ToNot(HaveOccurred())
 				Expect(out).To(HavePrefix("Error:"))
 			})
-			It("Prints an error message when value commin from STDIN and comming from file", func() {
+			It("Prints an error message when value commin from STDIN and coming from file", func() {
 				// cat value.txt | goyaml -f file.yaml set key --stdin value
 				out, err := runCommand(extraSetStringValue, "-f", workFile.Name(), "set", "--stdin", extraSetStringKey, "-i", workFile.Name())
 				Expect(err).ToNot(HaveOccurred())
 				Expect(out).To(HavePrefix("Error:"))
 			})
-			It("Prints an error message when value specified as a parameter and comming from file", func() {
+			It("Prints an error message when value specified as a parameter and coming from file", func() {
 				// cat value.txt | goyaml -f file.yaml set key --stdin value
 				out, err := runCommand(extraSetStringValue, "-f", workFile.Name(), "set", extraSetStringKey, extraSetStringValue, "-i", workFile.Name())
 				Expect(err).ToNot(HaveOccurred())
@@ -375,7 +375,7 @@ a:
 			})
 		})
 		When("A value is specified from multiple sources", func() {
-			It("Prints an error message when value specified as a parameter and comming from file", func() {
+			It("Prints an error message when value specified as a parameter and coming from file", func() {
 				// cat value.txt | goyaml -f file.yaml set key --stdin value
 				out, err := runCommand(_SampleYAML, "set", "--stdin", extraSetStringKey, "-i", "someFile.txt")
 				Expect(err).ToNot(HaveOccurred())

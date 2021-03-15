@@ -1,10 +1,18 @@
 package commands
 
 import (
+	"os"
+
 	"github.com/pkg/errors"
 	"github.com/theochva/goyaml/internal/commands/cli"
 	"github.com/theochva/goyaml/pkg/yamlfile"
 )
+
+var commandFactories = []func(globalOpts GlobalOptions) cli.AppSubCommand{}
+
+func registerCommand(factoryFunc func(globalOpts GlobalOptions) cli.AppSubCommand) {
+	commandFactories = append(commandFactories, factoryFunc)
+}
 
 // GlobalOptions - global options that are needed to be accessed by all subcommands
 type GlobalOptions interface {
@@ -57,16 +65,15 @@ func (o *_GlobalOptions) Load() (err error) {
 func NewGoyamlApp(version, commit, date string) *cli.App {
 	rootCmd := newRootCommand(version, commit, date)
 
-	rootCmd.AddSubCommands(
-		newGetCommand(rootCmd.GlobalOpts()),
-		newSetCommand(rootCmd.GlobalOpts()),
-		newDeleteCommand(rootCmd.GlobalOpts()),
-		newContainsCommand(rootCmd.GlobalOpts()),
-		newValidateCommand(rootCmd.GlobalOpts()),
-		newFromJSONCommand(rootCmd.GlobalOpts()),
-		newToJSONCommand(rootCmd.GlobalOpts()),
-		newExpandCommand(rootCmd.GlobalOpts()),
-		// newCompletionCommand(rootCmd.GlobalOpts()),
-	)
+	globalOpts := rootCmd.GlobalOpts()
+
+	for _, newCommand := range commandFactories {
+		rootCmd.AddSubCommands(newCommand(globalOpts))
+	}
+
+	// Set default out and err
+	rootCmd.GetCliCommand().SetOut(os.Stdout)
+	rootCmd.GetCliCommand().SetErr(os.Stderr)
+
 	return cli.NewApp(rootCmd)
 }

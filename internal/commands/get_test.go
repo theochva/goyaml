@@ -23,7 +23,7 @@ var _ = Describe("Command 'get' scenarios", func() {
 			Expect(out).To(Equal(getHelpTextForCommand("get")))
 		})
 	})
-	When("Source YAML is comming from STDIN", func() {
+	When("Source YAML is coming from STDIN", func() {
 		var (
 			keys = []string{
 				_SampleYAMLExistingKey, _SampleYAMLExistingKey, _SampleYAMLExistingKey,

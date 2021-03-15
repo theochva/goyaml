@@ -41,7 +41,7 @@ first:
   second:
     third: a value
 `
-	// In this example, the yaml is comming from a variable, but all
+	// In this example, the yaml is coming from a variable, but all
 	// we need is a string with YAML content.
 	yamlDoc, err := FromString(yamlStr)
 	if err != nil {
