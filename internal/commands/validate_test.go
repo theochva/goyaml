@@ -21,7 +21,7 @@ var _ = Describe("Command 'validate' scenarios", func() {
 			Expect(out).To(Equal(getHelpTextForCommand("validate")))
 		})
 	})
-	When("Source YAML is comming from STDIN", func() {
+	When("Source YAML is coming from STDIN", func() {
 		It("outputs 'true' for valid YAML", func() {
 			// cat file.yaml | goyaml validate
 			out, err := runCommand(_SampleYAML, "validate")

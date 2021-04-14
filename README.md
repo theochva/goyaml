@@ -1,5 +1,10 @@
 # goyaml
 
+[![release-build](https://github.com/theochva/goyaml/actions/workflows/release.yml/badge.svg)](https://github.com/theochva/goyaml/actions?query=workflow%3A%22build-release%22)
+[![tests](https://github.com/theochva/goyaml/actions/workflows/pull-request.yml/badge.svg)](https://github.com/theochva/goyaml/actions?query=workflow%3A%22tests%22)
+[![Go Report Card](https://goreportcard.com/badge/github.com/theochva/goyaml)](https://goreportcard.com/report/github.com/theochva/goyaml)
+[![GoDoc](https://godoc.org/github.com/theochva/goyaml?status.png)](https://godoc.org/github.com/theochva/goyaml)
+
 ## Introduction
 
 Utility for performing simple actions on YAML files.  Primarily intended to be used inside shell scripts.

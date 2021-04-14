@@ -67,7 +67,7 @@ bird-food:
 			Expect(out).To(Equal(getHelpTextForCommand("delete")))
 		})
 	})
-	When("Source YAML is comming from STDIN", func() {
+	When("Source YAML is coming from STDIN", func() {
 		It("prints 'true' when the specified key exists in the YAML content and is deleted", func() {
 			// cat file.yaml | goyaml delete some.existing.key
 			inputString := strings.Join([]string{_SampleExtraYAML, _SampleYAML}, "\n")

@@ -1,4 +1,4 @@
-name: validate-PR
+name: tests
 
 on:
   pull_request:

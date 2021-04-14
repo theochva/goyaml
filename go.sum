@@ -511,8 +511,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
-github.com/theochva/go-misc v0.1.0 h1:AAo5DHyFT7/RNhnkwtrZ9vXRYNT0JZQCYfPQaNxD07Y=
-github.com/theochva/go-misc v0.1.0/go.mod h1:O+UfKdhTsnTSNfTy3vLPp7XS5ddhXxtcx6fhpVVqyIg=
+github.com/theochva/go-misc v0.2.0 h1:ZnlUT8b9KMRo7rxC9whS9zPa/iRtzGcPtkxpGXv0E6g=
+github.com/theochva/go-misc v0.2.0/go.mod h1:O+UfKdhTsnTSNfTy3vLPp7XS5ddhXxtcx6fhpVVqyIg=
 github.com/tj/assert v0.0.0-20171129193455-018094318fb0/go.mod h1:mZ9/Rh9oLWpLLDRpvE+3b7gP/C2YyLFYxNmcLnPTMe0=
 github.com/tj/assert v0.0.3 h1:Df/BlaZ20mq6kuai7f5z2TvPFiwC3xaWJSDQNiIS3Rk=
 github.com/tj/assert v0.0.3/go.mod h1:Ne6X72Q+TB1AteidzQncjw9PabbMp4PBMZ1k+vd1Pvk=
