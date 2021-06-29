@@ -3,6 +3,8 @@ module github.com/theochva/goyaml
 go 1.16
 
 require (
+	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
 	github.com/goreleaser/goreleaser v0.159.0
 	github.com/onsi/ginkgo v1.15.1
 	github.com/onsi/gomega v1.11.0
