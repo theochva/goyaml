@@ -14,18 +14,19 @@ import (
 // ErrEmptyKey - error generated when empty key specified
 var ErrEmptyKey = errors.New("Empty key specified")
 
+// DefaultIndent - the default indentation of the yaml
+const DefaultIndent = 2
+
 type yamlDoc struct {
-	data map[interface{}]interface{}
+	data map[string]interface{}
 }
 
 // YamlDoc - interface for manipulating yaml file
 type YamlDoc interface {
 	// Data - get the underlying map
-	Data() map[interface{}]interface{}
+	Data() map[string]interface{}
 	// SetData - set the underlying map
-	SetData(newData map[interface{}]interface{}) YamlDoc
-	// Map - get the data as map of nested maps with string as the key
-	Map() (converted bool, mapData map[string]interface{})
+	SetData(newData map[string]interface{}) YamlDoc
 	// Get - get the value at key from the yaml
 	Get(key string) (value interface{}, err error)
 	// GetString - get the string value at key from the yaml
@@ -42,16 +43,20 @@ type YamlDoc interface {
 	Delete(key string) (deleted bool, err error)
 	// Contains - check if the specified key path is contained within the yaml
 	Contains(key string) (contains bool, err error)
-	// Bytes - get the yaml file as bytes
+	// Bytes - get the yaml file as bytes (default indentation is 2 spaces)
 	Bytes() ([]byte, error)
-	// Text - get the yaml file as text
+	// Text - get the yaml file as text (default indentation is 2 spaces)
 	Text() (string, error)
+	// BytesIndented - get the yaml file as bytes indented with the specified indent
+	BytesIndented(spaces int) ([]byte, error)
+	// TextIndented - get the yaml file as text indented with the specified indent
+	TextIndented(spaces int) (string, error)
 }
 
 // New - create new yaml from reader
 func New(reader io.Reader) (YamlDoc, error) {
 	result := &yamlDoc{
-		data: map[interface{}]interface{}{},
+		data: map[string]interface{}{},
 	}
 
 	if reader != nil {
@@ -77,26 +82,18 @@ func FromString(yamlText string) (YamlDoc, error) {
 }
 
 // Data - get the underlying map
-func (y *yamlDoc) Data() map[interface{}]interface{} {
+func (y *yamlDoc) Data() map[string]interface{} {
 	return y.data
 }
 
 // SetData - set the underlying map
-func (y *yamlDoc) SetData(newData map[interface{}]interface{}) YamlDoc {
+func (y *yamlDoc) SetData(newData map[string]interface{}) YamlDoc {
 	if newData == nil {
-		y.data = map[interface{}]interface{}{}
+		y.data = map[string]interface{}{}
 	} else {
 		y.data = newData
 	}
 	return y
-}
-
-// Map - get the data as map of nested maps with string as the key
-func (y *yamlDoc) Map() (converted bool, mapData map[string]interface{}) {
-	mapData, converted = convertNested(y.data).(map[string]interface{})
-
-	return
-
 }
 
 // Get - get the value at key from the yaml
@@ -108,7 +105,7 @@ func (y *yamlDoc) Get(key string) (value interface{}, err error) {
 	var (
 		keys            = strings.Split(key, ".")
 		lastIndex   int = len(keys) - 1
-		currData    map[interface{}]interface{}
+		currData    map[string]interface{}
 		containsKey bool
 	)
 
@@ -123,8 +120,10 @@ func (y *yamlDoc) Get(key string) (value interface{}, err error) {
 			if index == lastIndex {
 				break
 			}
-			if mapValue, ok := value.(map[interface{}]interface{}); ok {
+			if mapValue, ok := value.(map[string]interface{}); ok {
 				currData = mapValue
+				// } else {
+				// 	// fmt.Printf("[DEBUG] value is not map[internface{}]interafce{} but: %T\n", value)
 			}
 		} else {
 			value = nil
@@ -187,7 +186,6 @@ func (y *yamlDoc) GetString(key string) (value string, err error) {
 			expectedType: reflect.TypeOf(value),
 			gotType:      reflect.TypeOf(obj),
 		}
-		// return "", errors.Wrapf(err, "Value at key '%s' is not a string", key)
 	}
 	return
 }
@@ -243,7 +241,7 @@ func (y *yamlDoc) Set(key string, value interface{}) (valueSet bool, err error) 
 		keys              = strings.Split(key, ".")
 		lastIndex     int = len(keys) - 1
 		traversedKeys     = []string{}
-		currData      map[interface{}]interface{}
+		currData      map[string]interface{}
 		dataValue     interface{}
 	)
 
@@ -257,11 +255,11 @@ func (y *yamlDoc) Set(key string, value interface{}) (valueSet bool, err error) 
 			break
 		}
 
-		if dataValue, _ = currData[key]; dataValue == nil {
-			dataValue = map[interface{}]interface{}{}
+		if dataValue = currData[key]; dataValue == nil {
+			dataValue = map[string]interface{}{}
 			currData[key] = dataValue
 		}
-		if mapValue, ok := dataValue.(map[interface{}]interface{}); ok {
+		if mapValue, ok := dataValue.(map[string]interface{}); ok {
 			currData = mapValue
 		} else {
 			return false, fmt.Errorf("key '%s' is not a map container", strings.Join(traversedKeys, "."))
@@ -279,7 +277,7 @@ func (y *yamlDoc) Delete(key string) (deleted bool, err error) {
 	var (
 		keys          = strings.Split(key, ".")
 		lastIndex int = len(keys) - 1
-		currData  map[interface{}]interface{}
+		currData  map[string]interface{}
 	)
 
 	currData = y.data
@@ -290,7 +288,7 @@ func (y *yamlDoc) Delete(key string) (deleted bool, err error) {
 				deleted = true
 				break
 			}
-			if mapValue, ok := value.(map[interface{}]interface{}); ok {
+			if mapValue, ok := value.(map[string]interface{}); ok {
 				currData = mapValue
 			}
 		} else {
@@ -309,7 +307,7 @@ func (y *yamlDoc) Contains(key string) (contains bool, err error) {
 	var (
 		keys          = strings.Split(key, ".")
 		lastIndex int = len(keys) - 1
-		currData  map[interface{}]interface{}
+		currData  map[string]interface{}
 	)
 
 	currData = y.data
@@ -319,7 +317,7 @@ func (y *yamlDoc) Contains(key string) (contains bool, err error) {
 				contains = true
 				break
 			}
-			if mapValue, ok := value.(map[interface{}]interface{}); ok {
+			if mapValue, ok := value.(map[string]interface{}); ok {
 				currData = mapValue
 			}
 		} else {
@@ -330,16 +328,44 @@ func (y *yamlDoc) Contains(key string) (contains bool, err error) {
 	return
 }
 
-// Bytes - get the yaml file as bytes
-func (y *yamlDoc) Bytes() ([]byte, error) {
-	return yaml.Marshal(y.data)
+// BytesIndented- get the yaml file as bytes indented with the specified indent
+func (y *yamlDoc) BytesIndented(spaces int) ([]byte, error) {
+	// Check the indent to make sure it is an allowed value
+	if spaces < 0 {
+		return nil, fmt.Errorf("cannot indent to a negative number of spaces")
+	}
+
+	var (
+		buf     = bytes.Buffer{}
+		encoder = yaml.NewEncoder(&buf)
+	)
+
+	// Set the indent
+	encoder.SetIndent(spaces)
+
+	// Encode the data to the buffer
+	if err := encoder.Encode(y.data); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
-// Text - get the yaml file as text
-func (y *yamlDoc) Text() (string, error) {
-	bytes, err := y.Bytes()
+// TextIndented - get the yaml file as text indented with the specified indent
+func (y *yamlDoc) TextIndented(spaces int) (string, error) {
+	bytes, err := y.BytesIndented(spaces)
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(string(bytes)), nil
+}
+
+// Bytes - get the yaml file as bytes
+func (y *yamlDoc) Bytes() ([]byte, error) {
+	return y.BytesIndented(DefaultIndent)
+}
+
+// Text - get the yaml file as text
+func (y *yamlDoc) Text() (string, error) {
+	return y.TextIndented(DefaultIndent)
 }

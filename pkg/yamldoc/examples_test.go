@@ -26,7 +26,7 @@ first:
 	// Read a value from the YAML file
 	var value string
 	if value, err = yamlDoc.GetString("first.second.third"); err != nil {
-		fmt.Printf("ERROR while reading value from yaml\n")
+		fmt.Printf("ERROR while reading value from yaml: %v\n", err.Error())
 		return
 	}
 
@@ -52,7 +52,7 @@ first:
 	// Read a value from the YAML file
 	var value string
 	if value, err = yamlDoc.GetString("first.second.third"); err != nil {
-		fmt.Printf("ERROR while reading value from yaml\n")
+		fmt.Printf("ERROR while reading value from yaml: %v\n", err.Error())
 		return
 	}
 
@@ -81,7 +81,7 @@ first:
 	// Read a value from the YAML file
 	var value string
 	if value, err = yamlDoc.GetString("first.second.third"); err != nil {
-		fmt.Printf("ERROR while reading value from yaml\n")
+		fmt.Printf("ERROR while reading value from yaml: %v\n", err.Error())
 		return
 	}
 

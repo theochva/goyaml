@@ -87,7 +87,7 @@ func (c *_FromJSONCommand) run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Now check the type of object read from the JSON file.
-	if mapValue, ok := value.(map[interface{}]interface{}); ok {
+	if mapValue, ok := value.(map[string]interface{}); ok {
 		c.globalOpts.YamlFile().SetData(mapValue)
 		changed = true
 	} else if strMapValue, ok := value.(map[string]interface{}); ok {
