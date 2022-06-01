@@ -66,7 +66,7 @@ Note:
 }
 
 func (c *_ToJSONCommand) run(cmd *cobra.Command, args []string) (err error) {
-	if converted, mapData := c.globalOpts.YamlFile().Map(); converted {
+	if mapData := c.globalOpts.YamlFile().Data(); mapData != nil {
 		var bytes []byte
 
 		if bytes, err = marshalToJSON(mapData, c.pretty); err != nil {

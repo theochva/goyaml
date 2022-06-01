@@ -33,9 +33,9 @@ var _ = Describe("Set command scenarios", func() {
 a:
   b:
     c:
-    - value1
-    - value2
-    - value3  
+      - value1
+      - value2
+      - value3
 `)
 	var extraSetArrayKey = "a.b.c"
 	var extraSetArrayValueAsJSON = `["value1","value2","value3"]`

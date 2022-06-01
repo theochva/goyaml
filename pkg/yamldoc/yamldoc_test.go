@@ -143,24 +143,8 @@ func checkSampleYaml(yaml YamlDoc, yamlText string) {
 
 var _ = Describe("Yaml functions", func() {
 	var (
-		yaml     YamlDoc
-		yamlText = strings.TrimSpace(_SampleYaml)
-		yamlMap  = map[interface{}]interface{}{
-			"a": map[interface{}]interface{}{
-				"b": map[interface{}]interface{}{
-					"c": "value-c",
-				},
-				"custom": map[interface{}]interface{}{
-					"string-prop": "string-value",
-					"int-prop":    100,
-					"bool-prop":   true,
-				},
-				"d": map[interface{}]interface{}{
-					"e": false,
-					"f": 10,
-				},
-			},
-		}
+		yaml          YamlDoc
+		yamlText      = strings.TrimSpace(_SampleYaml)
 		yamlStringMap = map[string]interface{}{
 			"a": map[string]interface{}{
 				"b": map[string]interface{}{
@@ -222,23 +206,17 @@ var _ = Describe("Yaml functions", func() {
 		})
 		// Check the data in the yaml is the same as the map we initialized with
 		JustBeforeEach(func() {
-			yaml.SetData(yamlMap)
+			yaml.SetData(yamlStringMap)
 		})
 
 		It("is the same as the original map", func() {
-			Expect(reflect.DeepEqual(yamlMap, yaml.Data())).To(BeTrue())
+			Expect(reflect.DeepEqual(yamlStringMap, yaml.Data())).To(BeTrue())
 		})
 
 		It("Check sample yaml", func() {
 			checkSampleYaml(yaml, yamlText)
 		})
 
-		It("can convert to map[string]interface{}", func() {
-			// Get the data as a map[string]interface{} is the same as the one we initialized with
-			converted, strYamlMap := yaml.Map()
-			Expect(converted).To(BeTrue())
-			Expect(reflect.DeepEqual(strYamlMap, yamlStringMap)).To(BeTrue())
-		})
 		It("can read custom object", func() {
 			obj := newCustomStruct()
 			expectedObj := expectedCustomStruct()

@@ -50,10 +50,10 @@ It is not parsable as JSON either.
 // Sample yaml from: https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started/
 var _SampleYAML = strings.TrimSpace(`
 calling-birds:
-- huey
-- dewey
-- louie
-- fred
+  - huey
+  - dewey
+  - louie
+  - fred
 doe: a deer, a female deer
 french-hens: 3
 pi: 3.14159

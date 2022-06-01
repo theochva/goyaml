@@ -11,7 +11,17 @@ type wrongTypeError struct {
 }
 
 func (e *wrongTypeError) Error() string {
-	return fmt.Sprintf("Expected type '%s' but got '%s'", e.expectedType.String(), e.gotType.String())
+	var (
+		expectedType = "<NIL>"
+		gotType      = "<NIL>"
+	)
+	if e.expectedType != nil {
+		expectedType = e.expectedType.String()
+	}
+	if e.gotType != nil {
+		gotType = e.gotType.String()
+	}
+	return fmt.Sprintf("Expected type '%s' but got '%s'", expectedType, gotType)
 }
 
 // IsWrongTypeError - check if the error is a wrong type error.

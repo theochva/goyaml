@@ -24,18 +24,7 @@ a:
 )
 
 var (
-	yamlText = strings.TrimSpace(_SampleYaml)
-	yamlMap  = map[interface{}]interface{}{
-		"a": map[interface{}]interface{}{
-			"b": map[interface{}]interface{}{
-				"c": "value-c",
-			},
-			"d": map[interface{}]interface{}{
-				"e": false,
-				"f": 10,
-			},
-		},
-	}
+	yamlText      = strings.TrimSpace(_SampleYaml)
 	yamlStringMap = map[string]interface{}{
 		"a": map[string]interface{}{
 			"b": map[string]interface{}{
@@ -116,7 +105,7 @@ var _ = Describe("YamlFile functions", func() {
 			// It should not exist
 			Expect(yamlFile.Exists()).To(BeFalse())
 			// Set the data
-			yamlFile.SetData(yamlMap)
+			yamlFile.SetData(yamlStringMap)
 
 			checkText(yamlFile, yamlText)
 
