@@ -22,16 +22,15 @@ builds:
       - arm64
 
 archives:
-  # - replacements:
-  #     amd64: x86_64
-  #   format: tar.gz
-  #   format_overrides:
-  #     - goos: windows
-  #       format: zip
   - format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
+    # Replaces "replacements" with this. See: https://goreleaser.com/deprecations/?h=replacements#archivesreplacements
+    name_template: >-
+      {{- .ProjectName }}_{{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
 
 checksum:
   name_template: "checksums.txt"
