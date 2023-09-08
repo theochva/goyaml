@@ -19,11 +19,16 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm64
 
 archives:
-  - replacements:
-      amd64: x86_64
-    format: tar.gz
+  # - replacements:
+  #     amd64: x86_64
+  #   format: tar.gz
+  #   format_overrides:
+  #     - goos: windows
+  #       format: zip
+  - format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
@@ -38,7 +43,7 @@ changelog:
       - "^docs:"
       - "^test:"
 brews:
-  - tap:
+  - repository:
       owner: theochva
       name: homebrew-grizano
     name: goyaml
